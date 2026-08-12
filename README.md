@@ -58,6 +58,54 @@ These boundaries are enforced by contract and are not configurable:
 
 ---
 
+## Architecture overview
+
+![Shift closeout architecture diagram: an authenticated nurse uses a Copilot Studio care-team experience on the left; past a labeled invocation boundary, a solid working P0 local deterministic simulation path and a dashed NOT RUN / BLOCKED live Copilot Studio to Foundry path both lead to exactly one Microsoft Foundry Shift Closeout Agent; a synthetic FHIR-shaped source grounds the agent; deterministic controls sit outside generation and fail closed; a human approval path produces a minimal attributable audit event with no chart write; a time-back view is labeled illustrative only; a correlation ID trace spans request, generation, decision, and audit; and a configuration and token contract cuts across the whole diagram.](docs/architecture/diagrams/shift-closeout-architecture.svg)
+
+The diagram above follows the same StoryBrand frame as this README: the care
+team is the hero, Microsoft Copilot Studio and Microsoft Foundry are the
+guide, and the bounded, human-reviewed workflow is the plan that returns
+time without asking anyone to trust an unreviewed draft.
+
+**Legend.**
+
+- **Solid boxes and arrows** trace the path that is implemented and
+  exercised today: the nurse's request moves through the Copilot Studio
+  care-team experience, into the **P0 local deterministic simulation**
+  (`src/orchestration/foundry-adapter.mjs`, exercised by `npm run demo`),
+  which returns a contract-valid draft with no network call and no platform
+  dependency.
+- **Dashed boxes and arrows** trace the **live Copilot Studio → Foundry
+  binding**, which is **NOT RUN** and remains blocked by open risks
+  `BLOCKER-001` (invocation model unverified), `BLOCKER-002` (role-claim
+  authorization unverified), and `BLOCKER-003` (external retrieval must be
+  verified disabled) — see [`docs/risks.md`](docs/risks.md). The dashed path
+  is drawn to show where that binding will attach once those blockers close;
+  it does not represent deployed connectivity.
+- Regardless of which path produced it, every draft is grounded only in the
+  **synthetic FHIR-shaped source**, passes through **deterministic controls**
+  (identity, context, schema, safety, grounding, and correlation checks that
+  sit outside the probabilistic generation step and fail closed on any gap),
+  and must clear the **human approval path** before a minimal, attributable
+  **audit event** is recorded. No step writes to a chart or takes a
+  production action.
+- A single **correlation ID** (see
+  [`docs/conventions/correlation-id.md`](docs/conventions/correlation-id.md))
+  is minted per run and echoed unchanged across request, generation,
+  decision, and audit, so any run can be traced end to end.
+- The **time-back view** is illustrative only, and the
+  **configuration and token contract** (organization, persona, workflow,
+  care setting, terminology, and branding) is a cross-cutting concern
+  resolved from configuration, not hardcoded logic — Harborlight Children's
+  Hospital is the example-only configuration used throughout this repository,
+  and secrets and endpoints are always kept in separate, uncommitted
+  environment bindings.
+
+The editable source for this diagram is
+[`docs/architecture/diagrams/shift-closeout-architecture.excalidraw`](docs/architecture/diagrams/shift-closeout-architecture.excalidraw).
+
+---
+
 ## Getting started
 
 ### Prerequisites
