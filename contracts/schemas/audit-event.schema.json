@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.second-shift-accelerator.example/v1/audit-event.schema.json",
+  "title": "Minimal audit event",
+  "description": "One minimal, correlated, attributable record per journey step. The contract deliberately provides nowhere to put generated narrative, synthetic resource payloads, agent instructions, or resolved identity.",
+  "type": "object",
+  "required": [
+    "contractVersion",
+    "auditEventId",
+    "eventType",
+    "correlationId",
+    "occurredAt",
+    "organizationId",
+    "actorRef",
+    "actorType",
+    "outcome"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "auditEventId": { "$ref": "common/definitions.schema.json#/$defs/auditEventId" },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "request",
+        "context-confirmation",
+        "generation",
+        "validation-failure",
+        "presentation",
+        "decision",
+        "revision",
+        "audit-query"
+      ]
+    },
+    "correlationId": { "$ref": "common/definitions.schema.json#/$defs/correlationId" },
+    "occurredAt": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+    "organizationId": { "$ref": "common/definitions.schema.json#/$defs/organizationId" },
+    "actorRef": { "$ref": "common/definitions.schema.json#/$defs/actorRef" },
+    "actorType": {
+      "type": "string",
+      "enum": ["human", "agent", "system"]
+    },
+    "actorRoleCode": { "$ref": "common/definitions.schema.json#/$defs/userRoleCode" },
+    "outcome": {
+      "type": "string",
+      "enum": ["success", "failure", "blocked"]
+    },
+    "failClosedCode": { "$ref": "common/definitions.schema.json#/$defs/failClosedCode" },
+    "outcomeDetail": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Short structured detail such as a failing field path. Scanned before it is written. Never a narrative, a value, or a payload."
+    },
+    "syntheticPatientId": { "$ref": "common/definitions.schema.json#/$defs/syntheticPatientId" },
+    "syntheticEncounterId": { "$ref": "common/definitions.schema.json#/$defs/syntheticEncounterId" },
+    "artifactId": { "$ref": "common/definitions.schema.json#/$defs/artifactId" },
+    "artifactVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "generationId": { "$ref": "common/definitions.schema.json#/$defs/generationId" },
+    "approvalEventId": { "$ref": "common/definitions.schema.json#/$defs/approvalEventId" },
+    "schemaValidationPassed": { "type": "boolean" },
+    "groundingVerified": { "type": "boolean" },
+    "decisionReasonPresent": {
+      "type": "boolean",
+      "description": "Records that a reason was supplied without copying the reason text into the audit trail."
+    },
+    "revisionNumber": { "type": "integer", "minimum": 0, "maximum": 10 }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "eventType": { "enum": ["context-confirmation", "generation", "presentation", "decision", "revision"] } },
+        "required": ["eventType"]
+      },
+      "then": { "required": ["syntheticPatientId", "syntheticEncounterId"] }
+    },
+    {
+      "if": { "properties": { "eventType": { "const": "generation" } }, "required": ["eventType"] },
+      "then": { "required": ["generationId", "schemaValidationPassed", "groundingVerified"] }
+    },
+    {
+      "if": { "properties": { "eventType": { "const": "decision" } }, "required": ["eventType"] },
+      "then": { "required": ["approvalEventId", "artifactId"] }
+    },
+    {
+      "if": { "properties": { "outcome": { "enum": ["failure", "blocked"] } }, "required": ["outcome"] },
+      "then": { "required": ["failClosedCode"] }
+    }
+  ]
+}

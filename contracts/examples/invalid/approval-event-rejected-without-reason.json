@@ -1,0 +1,30 @@
+{
+  "contractVersion": "1.0.0",
+  "approvalEventId": "APR-20260812A001",
+  "correlationId": "CORR-20260812-9f2a4c7d1b6e48a0b3c5d7e9f1a2b4c6",
+  "recordedAt": "2026-08-12T06:52:47Z",
+  "organizationId": "harborlight",
+  "decision": "rejected",
+  "approver": {
+    "actorRef": "USR-RN0000000001",
+    "roleCode": "registered-nurse",
+    "authenticated": true
+  },
+  "artifact": {
+    "artifactId": "ART-20260812A001",
+    "artifactVersion": "1.0.0",
+    "artifactSha256": "9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f",
+    "generationId": "GEN-20260812A001",
+    "agentInstructionVersion": "1.0.0"
+  },
+  "reconfirmedContext": {
+    "syntheticPatientId": "SYN-PAT-PED0001A",
+    "syntheticEncounterId": "SYN-ENC-PEDENC001",
+    "preApprovalConfirmedAt": "2026-08-12T06:52:44Z",
+    "sourceBundleId": "SYN-BDL-PEDBDL01",
+    "sourceBundleSha256": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b"
+  },
+  "revisionNumber": 0,
+  "lifecycleStatus": "REJECTED",
+  "statusLabel": "REJECTED — NOT FOR USE"
+}

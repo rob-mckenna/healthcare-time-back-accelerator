@@ -1,0 +1,266 @@
+{
+  "runAt": "2026-08-12T14:13:16Z",
+  "organizationId": "harborlight",
+  "generationBoundary": "SIMULATION BOUNDARY — live Foundry invocation pending BLOCKER-001 and BLOCKER-003 resolution",
+  "liveFoundryEvaluation": "NOT RUN — BLOCKER-003 open (docs/risks.md)",
+  "correlationIds": {
+    "primaryRun": "CORR-20260812-7997c61f5cc394797e13975e6d7cf4e9",
+    "rejectionRun": "CORR-20260812-e57e857955889f05c2bad22974de4d64"
+  },
+  "decisionsExercised": [
+    "revision-requested",
+    "rejected",
+    "approved"
+  ],
+  "draftStatus": "DRAFT — HUMAN REVIEW REQUIRED",
+  "auditEventCount": 22,
+  "decisionEventCount": 3,
+  "illustrativeMetric": {
+    "contractVersion": "1.0.0",
+    "metricLabel": "ILLUSTRATIVE",
+    "illustrative": true,
+    "notForClinicalUse": true,
+    "dataProvenance": "synthetic-simulated",
+    "disclaimerText": "ILLUSTRATIVE ONLY — simulated sample figures from synthetic data. Not a measured patient, care-team, or organizational outcome.",
+    "metricId": "MET-TIMEBACK-01",
+    "metricName": "Time returned to care",
+    "baselineDurationMinutes": 24,
+    "assistedDurationMinutes": 9,
+    "illustrativeTimeReturnedMinutes": 15,
+    "draftOutcomeStatus": "revised-before-approval",
+    "approvalCoverage": {
+      "approvedCount": 1,
+      "totalCount": 2,
+      "coveragePercent": 50
+    },
+    "organizationId": "harborlight",
+    "correlationId": "CORR-20260812-7997c61f5cc394797e13975e6d7cf4e9",
+    "periodLabel": "Synthetic pilot week 1"
+  },
+  "checks": [
+    {
+      "milestone": "M1",
+      "name": "unauthenticated request refused",
+      "ok": true,
+      "detail": "E-IDENTITY-MISSING"
+    },
+    {
+      "milestone": "M1",
+      "name": "refusal shows a configured user-safe message only",
+      "ok": true,
+      "detail": "We could not verify your identity for this workflow. Please sign out, sign back in, and try again."
+    },
+    {
+      "milestone": "M2",
+      "name": "unconfirmed request refused",
+      "ok": true,
+      "detail": "E-CONTEXT-UNCONFIRMED"
+    },
+    {
+      "milestone": "M1",
+      "name": "authenticated request produces exactly one correlation identifier",
+      "ok": true,
+      "detail": "CORR-20260812-7997c61f5cc394797e13975e6d7cf4e9"
+    },
+    {
+      "milestone": "M1",
+      "name": "short reference displayed",
+      "ok": true,
+      "detail": "Ref 6d7cf4e9"
+    },
+    {
+      "milestone": "M2",
+      "name": "confirmed identifiers carry synthetic prefixes",
+      "ok": true,
+      "detail": "SYN-PAT-PED0001A / SYN-ENC-PEDENC001"
+    },
+    {
+      "milestone": "M3",
+      "name": "draftStatus is DRAFT — HUMAN REVIEW REQUIRED",
+      "ok": true,
+      "detail": "DRAFT — HUMAN REVIEW REQUIRED"
+    },
+    {
+      "milestone": "M3",
+      "name": "lifecycleStatus is DRAFT",
+      "ok": true,
+      "detail": "DRAFT"
+    },
+    {
+      "milestone": "M3",
+      "name": "all four sections present",
+      "ok": true,
+      "detail": "openItems=1 followUpItems=1"
+    },
+    {
+      "milestone": "M3",
+      "name": "no recommendation surface in the artifact",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "milestone": "M3",
+      "name": "all nine safety assertions hold",
+      "ok": true,
+      "detail": "{\"noDiagnosis\":true,\"noTreatmentOrMedicationRecommendation\":true,\"noTriage\":true,\"noClinicalRecommendation\":true,\"noPatientOrFamilyCommunication\":true,\"syntheticSourceOnly\":true,\"groundingComplete\":true,\"groundingCoverageRatio\":1,\"externalRetrievalDisabled\":true}"
+    },
+    {
+      "milestone": "M3",
+      "name": "provenance echoes the correlation identifier and names the instruction version",
+      "ok": true,
+      "detail": "1.0.0 f9020da92883…"
+    },
+    {
+      "milestone": "M3",
+      "name": "provenance digest matches the shipped instruction manifest",
+      "ok": true,
+      "detail": "f9020da92883…"
+    },
+    {
+      "milestone": "M4",
+      "name": "every section exposes source references",
+      "ok": true,
+      "detail": "6 reference(s) in the master list"
+    },
+    {
+      "milestone": "M4",
+      "name": "every reference opens the underlying synthetic content",
+      "ok": true,
+      "detail": "Encounter/SYN-ENC-PEDENC001, Encounter/SYN-ENC-PEDENC001, Observation/SYN-OBS-OBS00001, Task/SYN-TSK-TSK00001, Task/SYN-TSK-TSK00001, CarePlan/SYN-CPL-CPL00001"
+    },
+    {
+      "milestone": "M4",
+      "name": "unsupported statement refused rather than shown",
+      "ok": true,
+      "detail": "E-GROUNDING-FAILURE"
+    },
+    {
+      "milestone": "M5",
+      "name": "request-revision recorded with a reason",
+      "ok": true,
+      "detail": "REVISION REQUESTED — DRAFT WITHDRAWN"
+    },
+    {
+      "milestone": "M5",
+      "name": "revision without a reason refused",
+      "ok": true,
+      "detail": "E-APPROVAL-WITHOUT-CONFIRMATION"
+    },
+    {
+      "milestone": "M5",
+      "name": "revision regenerates inside the same correlated run",
+      "ok": true,
+      "detail": "CORR-20260812-7997c61f5cc394797e13975e6d7cf4e9"
+    },
+    {
+      "milestone": "M5",
+      "name": "prompt-injection revision text refused before the agent boundary",
+      "ok": true,
+      "detail": "E-SAFETY-FLAG"
+    },
+    {
+      "milestone": "M5",
+      "name": "revision past operations.maxRevisions (3) refused",
+      "ok": true,
+      "detail": "E-REVISION-LIMIT-REACHED"
+    },
+    {
+      "milestone": "M5",
+      "name": "approval for a different patient refused",
+      "ok": true,
+      "detail": "E-APPROVAL-WITHOUT-CONFIRMATION"
+    },
+    {
+      "milestone": "M5",
+      "name": "approval recorded after reconfirmation",
+      "ok": true,
+      "detail": "APPROVED — SIMULATED FINALIZATION ONLY"
+    },
+    {
+      "milestone": "M5",
+      "name": "approval binds to the exact artifact digest",
+      "ok": true,
+      "detail": "20186524067e…"
+    },
+    {
+      "milestone": "M5",
+      "name": "approved artifact still carries the draft label",
+      "ok": true,
+      "detail": "DRAFT — HUMAN REVIEW REQUIRED"
+    },
+    {
+      "milestone": "M5",
+      "name": "digest covers presented content, so an altered artifact cannot reuse the approval",
+      "ok": true,
+      "detail": "21febfc9ccd5…"
+    },
+    {
+      "milestone": "M5",
+      "name": "approval event carries an opaque actor reference and no personal data",
+      "ok": true,
+      "detail": "USR-RN0000000001"
+    },
+    {
+      "milestone": "M5",
+      "name": "rejection recorded with a reason in a second correlated run",
+      "ok": true,
+      "detail": "REJECTED — NOT FOR USE"
+    },
+    {
+      "milestone": "M5",
+      "name": "decision reason passed the governance PHI scan",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "milestone": "M5",
+      "name": "decision reason carrying a direct identifier refused",
+      "ok": true,
+      "detail": "E-SAFETY-FLAG"
+    },
+    {
+      "milestone": "M6",
+      "name": "one correlation identifier retrieves request, generation, decision, and outcome events",
+      "ok": true,
+      "detail": "request, context-confirmation, generation, presentation, decision, revision"
+    },
+    {
+      "milestone": "M6",
+      "name": "the two runs keep separate evidence",
+      "ok": true,
+      "detail": "14 + 5 events"
+    },
+    {
+      "milestone": "M6",
+      "name": "no audit event carries narrative or personal content",
+      "ok": true,
+      "detail": "22 total (14 + 5 correlated + 3 refused-attempt)"
+    },
+    {
+      "milestone": "M6",
+      "name": "every fail-closed outcome names its code",
+      "ok": true,
+      "detail": "E-IDENTITY-MISSING, E-CONTEXT-UNCONFIRMED, E-SAFETY-FLAG"
+    },
+    {
+      "milestone": "M6",
+      "name": "illustrative metric validates against the contract",
+      "ok": true,
+      "detail": "15 min returned (ILLUSTRATIVE)"
+    },
+    {
+      "milestone": "M6",
+      "name": "baseline and assisted figures come from the organization pack",
+      "ok": true,
+      "detail": "24 / 9"
+    },
+    {
+      "milestone": "M6",
+      "name": "every figure in the view carries the ILLUSTRATIVE label",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "passed": 37,
+  "total": 37
+}

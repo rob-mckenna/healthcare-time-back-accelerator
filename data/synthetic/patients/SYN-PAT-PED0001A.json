@@ -1,0 +1,33 @@
+{
+  "_synthetic": true,
+  "_notice": "SYNTHETIC ONLY — not a real patient record. Created for demonstration purposes. No PHI or PII.",
+  "_datasetVersion": "1.0.0",
+  "resourceType": "Patient",
+  "id": "SYN-PAT-PED0001A",
+  "meta": {
+    "versionId": "1.0.0",
+    "profile": [
+      "SYNTHETIC-ONLY — demonstration record"
+    ]
+  },
+  "extension": [
+    {
+      "url": "https://contracts.second-shift-accelerator.example/v1/synthetic-marker",
+      "valueBoolean": true
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "given": ["Aurora"],
+      "family": "Testcase"
+    }
+  ],
+  "birthDate": "2018-04-11",
+  "gender": "female",
+  "generalPractitioner": [
+    {
+      "reference": "Practitioner/SYN-PRAC-RN000001"
+    }
+  ]
+}

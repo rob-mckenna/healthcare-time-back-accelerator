@@ -1,0 +1,22 @@
+{
+  "contractVersion": "1.0.0",
+  "metricLabel": "ILLUSTRATIVE",
+  "illustrative": true,
+  "notForClinicalUse": true,
+  "dataProvenance": "synthetic-simulated",
+  "disclaimerText": "ILLUSTRATIVE ONLY — simulated sample figures from synthetic data. Not a measured patient, care-team, or organizational outcome.",
+  "metricId": "MET-TIMEBACK-01",
+  "metricName": "Time returned to care per shift closeout",
+  "organizationId": "harborlight",
+  "correlationId": "CORR-20260812-9f2a4c7d1b6e48a0b3c5d7e9f1a2b4c6",
+  "periodLabel": "Synthetic pilot week 1",
+  "baselineDurationMinutes": 24,
+  "assistedDurationMinutes": 9,
+  "illustrativeTimeReturnedMinutes": 45,
+  "draftOutcomeStatus": "accepted-as-drafted",
+  "approvalCoverage": {
+    "approvedCount": 8,
+    "totalCount": 10,
+    "coveragePercent": 80
+  }
+}

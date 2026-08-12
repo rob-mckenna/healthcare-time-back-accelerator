@@ -1,0 +1,87 @@
+# Squad: ignore runtime state (logs, inbox, sessions, memory, identity, cache)
+# Note: .squad/casting/* is identity and MUST be committed to main, not ignored
+# Note: .squad/rai/audit-trail.md and .squad/fact-checker/audit-trail.md are
+# committed governance evidence logs, not runtime scratch, and are NOT ignored.
+.squad/orchestration-log/
+.squad/log/
+.squad/decisions/inbox/
+.squad/sessions/
+.squad/.scratch/
+.squad/.cache/
+# Squad: tiered-memory subsystem (audit.jsonl, index.json, inboxes, tombstones) —
+# local per-machine working state for the (unshipped) memory pipeline, not source.
+.squad/memory/
+# Squad: per-session focus/wisdom notes — runtime-managed, rewritten every
+# session per squad.agent.md.template, not authoritative governance.
+.squad/identity/
+# Squad: first-run marker timestamp (local to this machine)
+.squad/.first-run
+# Squad: SubSquad activation file (local to this machine)
+.squad-workstream
+
+# Accelerator: Node dependencies and caches
+node_modules/
+.npm/
+.eslintcache
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Accelerator: build, distribution, coverage, and test artifacts
+dist/
+build/
+out/
+coverage/
+.nyc_output/
+*.tgz
+
+# Accelerator: logs and temp files
+*.log
+logs/
+*.tmp
+*.temp
+*.pid
+*.seed
+
+# Accelerator: editor and OS artifacts
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Accelerator: Azure Functions and other local-only runtime configuration
+local.settings.json
+*.PublishSettings
+*.publishsettings
+
+# Accelerator: certificates and private key material
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+*.jks
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+
+# Accelerator: environment values. Only .env.example / .env.sample / .env.template
+# files are committed (repo root or nested, e.g. config/environments/), and they
+# carry variable names and placeholders, never values.
+.env
+.env.*
+!*.env.example
+!*.env.sample
+!*.env.template
+
+# Accelerator: local scratch and validation output
+*.local.json
+tests/.artifacts/

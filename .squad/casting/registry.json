@@ -1,0 +1,39 @@
+{
+  "agents": {
+    "lead-architect-integrator": {
+      "persistent_name": "Trinity",
+      "universe": "The Matrix",
+      "created_at": "2026-08-12T06:51:45.182-04:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "healthcare-workflow-story": {
+      "persistent_name": "Switch",
+      "universe": "The Matrix",
+      "created_at": "2026-08-12T06:51:45.182-04:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "copilot-studio-engineer": {
+      "persistent_name": "Tank",
+      "universe": "The Matrix",
+      "created_at": "2026-08-12T06:51:45.182-04:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "foundry-agent-engineer": {
+      "persistent_name": "Neo",
+      "universe": "The Matrix",
+      "created_at": "2026-08-12T06:51:45.182-04:00",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "data-security-quality": {
+      "persistent_name": "Morpheus",
+      "universe": "The Matrix",
+      "created_at": "2026-08-12T06:51:45.182-04:00",
+      "legacy_named": false,
+      "status": "active"
+    }
+  }
+}

@@ -1,0 +1,290 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.second-shift-accelerator.example/v1/shift-closeout-agent-output.schema.json",
+  "title": "Shift Closeout Agent output",
+  "description": "The only structure the Shift Closeout Agent may return. Output that fails this contract must never be presented to a user. P0 deliberately has no recommendation, assessment, triage, or plan section.",
+  "type": "object",
+  "required": [
+    "contractVersion",
+    "generationId",
+    "correlationId",
+    "idempotencyKey",
+    "generatedAt",
+    "organizationId",
+    "artifactId",
+    "artifactVersion",
+    "draftStatus",
+    "lifecycleStatus",
+    "safetyStatus",
+    "provenance",
+    "context",
+    "requestedScope",
+    "sourceReferences",
+    "disclaimer"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "generationId": { "$ref": "common/definitions.schema.json#/$defs/generationId" },
+    "correlationId": {
+      "$ref": "common/definitions.schema.json#/$defs/correlationId",
+      "description": "Echoed unchanged from the input. A mismatch is a fail-closed condition."
+    },
+    "idempotencyKey": { "$ref": "common/definitions.schema.json#/$defs/idempotencyKey" },
+    "generatedAt": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+    "organizationId": { "$ref": "common/definitions.schema.json#/$defs/organizationId" },
+    "artifactId": { "$ref": "common/definitions.schema.json#/$defs/artifactId" },
+    "artifactVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "artifactSha256": {
+      "$ref": "common/definitions.schema.json#/$defs/sha256",
+      "description": "Digest computed by the validation layer over the canonical artifact. Bound into the approval event."
+    },
+    "draftStatus": { "$ref": "common/definitions.schema.json#/$defs/draftStatus" },
+    "lifecycleStatus": {
+      "type": "string",
+      "const": "DRAFT",
+      "description": "An agent can only ever emit DRAFT. Any other lifecycle state requires a recorded human approval event."
+    },
+    "safetyStatus": {
+      "type": "object",
+      "description": "Machine-checkable safety gate. Every flag must be true or the output is refused.",
+      "required": [
+        "noDiagnosis",
+        "noTreatmentOrMedicationRecommendation",
+        "noTriage",
+        "noClinicalRecommendation",
+        "noPatientOrFamilyCommunication",
+        "syntheticSourceOnly",
+        "groundingComplete",
+        "groundingCoverageRatio"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "noDiagnosis": { "type": "boolean", "const": true },
+        "noTreatmentOrMedicationRecommendation": { "type": "boolean", "const": true },
+        "noTriage": { "type": "boolean", "const": true },
+        "noClinicalRecommendation": { "type": "boolean", "const": true },
+        "noPatientOrFamilyCommunication": { "type": "boolean", "const": true },
+        "syntheticSourceOnly": { "type": "boolean", "const": true },
+        "groundingComplete": {
+          "type": "boolean",
+          "const": true,
+          "description": "Fully referenced output is the only presentable state in Option A. Partial grounding is a fail-closed condition and is recorded as an audit event, not as a draft."
+        },
+        "groundingCoverageRatio": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1
+        },
+        "externalRetrievalDisabled": {
+          "type": "boolean",
+          "const": true,
+          "description": "Asserts the agent deployment had no external retrieval or knowledge augmentation enabled. Verified through deployment configuration, not through model self-report alone."
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Everything needed to reproduce and audit this draft.",
+      "required": [
+        "agentInstructionVersion",
+        "agentInstructionSha256",
+        "outputContractVersion",
+        "modelConfigRef",
+        "sourceBundleId",
+        "sourceBundleSha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "agentInstructionVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+        "agentInstructionSha256": {
+          "$ref": "common/definitions.schema.json#/$defs/sha256",
+          "description": "Digest of the versioned instruction file. Reproducibility does not depend on unverified platform metadata."
+        },
+        "outputContractVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+        "modelConfigRef": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{3,128}$",
+          "description": "Opaque deployment configuration reference. Never a URL, endpoint, key, or connection string."
+        },
+        "sourceBundleId": { "$ref": "common/definitions.schema.json#/$defs/syntheticBundleId" },
+        "sourceBundleSha256": { "$ref": "common/definitions.schema.json#/$defs/sha256" }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["syntheticPatientId", "syntheticEncounterId"],
+      "additionalProperties": false,
+      "properties": {
+        "syntheticPatientId": { "$ref": "common/definitions.schema.json#/$defs/syntheticPatientId" },
+        "syntheticEncounterId": { "$ref": "common/definitions.schema.json#/$defs/syntheticEncounterId" },
+        "shiftPeriodLabel": { "type": "string", "maxLength": 64 },
+        "careSettingLabel": { "type": "string", "maxLength": 128 }
+      }
+    },
+    "requestedScope": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "common/definitions.schema.json#/$defs/outputSection" },
+      "description": "Echoed from the input. Sections outside this list must be absent."
+    },
+    "shiftSummary": {
+      "type": "object",
+      "required": ["narrative", "sourceReferences"],
+      "additionalProperties": false,
+      "properties": {
+        "structureLabel": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Name of the documented handoff structure the organization already uses, supplied by configuration."
+        },
+        "narrative": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "description": "Organised summary of documented synthetic content for the shift period. Summarisation and organisation only."
+        },
+        "sourceReferences": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": { "$ref": "source-reference.schema.json" }
+        }
+      }
+    },
+    "handoffSummary": {
+      "type": "object",
+      "required": ["narrative", "sourceReferences"],
+      "additionalProperties": false,
+      "properties": {
+        "narrative": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "description": "Organised handoff content drawn only from documented synthetic entries. Contains no recommendation, assessment, or plan."
+        },
+        "receivingRoleLabel": { "type": "string", "maxLength": 96 },
+        "pendingHumanDecisionNotice": {
+          "type": "string",
+          "const": "PENDING HUMAN DECISION — no recommendation is generated",
+          "description": "Fixed notice occupying the place a recommendation section would take in a clinical handoff format."
+        },
+        "sourceReferences": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": { "$ref": "source-reference.schema.json" }
+        }
+      }
+    },
+    "openItems": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "required": ["itemId", "description", "sourceReferences"],
+        "additionalProperties": false,
+        "properties": {
+          "itemId": { "type": "string", "pattern": "^ITM-[A-Z0-9]{6,16}$" },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512,
+            "description": "A documented open item transcribed from the synthetic source. Not an agent judgement."
+          },
+          "sourceResourceType": { "$ref": "common/definitions.schema.json#/$defs/fhirResourceType" },
+          "documentedPriorityLabel": {
+            "type": "string",
+            "maxLength": 64,
+            "description": "Priority label copied from the synthetic source. The agent never assigns priority or urgency."
+          },
+          "sourceReferences": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": { "$ref": "source-reference.schema.json" }
+          }
+        }
+      }
+    },
+    "followUpItems": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "required": ["itemId", "description", "sourceReferences"],
+        "additionalProperties": false,
+        "properties": {
+          "itemId": { "type": "string", "pattern": "^ITM-[A-Z0-9]{6,16}$" },
+          "description": { "type": "string", "minLength": 1, "maxLength": 512 },
+          "documentedAssignedRoleLabel": { "type": "string", "maxLength": 96 },
+          "documentedDueLabel": { "type": "string", "maxLength": 64 },
+          "sourceReferences": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 10,
+            "items": { "$ref": "source-reference.schema.json" }
+          }
+        }
+      }
+    },
+    "sourceReferences": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 200,
+      "description": "Deduplicated master list of every reference used anywhere in this output.",
+      "items": { "$ref": "source-reference.schema.json" }
+    },
+    "disclaimer": {
+      "type": "object",
+      "required": ["mandatoryPrefix", "body"],
+      "additionalProperties": false,
+      "properties": {
+        "mandatoryPrefix": { "$ref": "common/definitions.schema.json#/$defs/draftStatus" },
+        "body": { "type": "string", "minLength": 40, "maxLength": 512 },
+        "syntheticDataNotice": { "type": "string", "minLength": 20, "maxLength": 256 }
+      }
+    },
+    "revision": {
+      "type": "object",
+      "required": ["priorGenerationId", "revisionNumber"],
+      "additionalProperties": false,
+      "properties": {
+        "priorGenerationId": { "$ref": "common/definitions.schema.json#/$defs/generationId" },
+        "revisionNumber": { "type": "integer", "minimum": 1, "maximum": 10 }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "requestedScope": { "type": "array", "contains": { "const": "shiftSummary" } } },
+        "required": ["requestedScope"]
+      },
+      "then": { "required": ["shiftSummary"] }
+    },
+    {
+      "if": {
+        "properties": { "requestedScope": { "type": "array", "contains": { "const": "handoffSummary" } } },
+        "required": ["requestedScope"]
+      },
+      "then": { "required": ["handoffSummary"] }
+    },
+    {
+      "if": {
+        "properties": { "requestedScope": { "type": "array", "contains": { "const": "openItems" } } },
+        "required": ["requestedScope"]
+      },
+      "then": { "required": ["openItems"] }
+    },
+    {
+      "if": {
+        "properties": { "requestedScope": { "type": "array", "contains": { "const": "followUpItems" } } },
+        "required": ["requestedScope"]
+      },
+      "then": { "required": ["followUpItems"] }
+    }
+  ]
+}

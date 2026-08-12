@@ -1,0 +1,41 @@
+{
+  "contractVersion": "1.0.0",
+  "requestId": "GEN-20260812A001",
+  "correlationId": "CORR-20260812-9f2a4c7d1b6e48a0b3c5d7e9f1a2b4c6",
+  "idempotencyKey": "IDK-4c6d8e0f2a4b6c8d0e2f4a6b8c0d2e4f",
+  "requestedAt": "2026-08-12T06:45:12Z",
+  "organizationId": "harborlight",
+  "terminologyPack": "harborlight-pediatrics",
+  "locale": "en-US",
+  "requester": {
+    "actorRef": "USR-RN0000000001",
+    "roleCode": "registered-nurse",
+    "authenticated": true
+  },
+  "context": {
+    "syntheticPatientId": "SYN-PAT-PED0001A",
+    "syntheticEncounterId": "SYN-ENC-PEDENC001",
+    "preGenerationConfirmedAt": "2026-08-12T06:45:10Z",
+    "confirmedByRef": "USR-RN0000000001"
+  },
+  "sourceBundle": {
+    "bundleId": "SYN-BDL-PEDBDL01",
+    "bundleVersion": "1.0.0",
+    "bundleSha256": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+    "approvedForGeneration": false
+  },
+  "shiftPeriod": {
+    "start": "2026-08-11T19:00:00Z",
+    "end": "2026-08-12T07:00:00Z",
+    "label": "Night shift"
+  },
+  "requestedScope": [
+    "shiftSummary",
+    "handoffSummary",
+    "openItems",
+    "followUpItems"
+  ],
+  "expectedOutputContractVersion": "1.0.0",
+  "agentInstructionVersion": "1.0.0",
+  "groundingThreshold": 1
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.second-shift-accelerator.example/v1/source-reference.schema.json",
+  "title": "Source reference",
+  "description": "Traces one generated statement back to an exact field of an approved synthetic resource. Every generated section requires at least one source reference.",
+  "type": "object",
+  "required": ["resourceType", "resourceId", "fieldPath", "fieldLabel"],
+  "additionalProperties": false,
+  "properties": {
+    "resourceType": { "$ref": "common/definitions.schema.json#/$defs/fhirResourceType" },
+    "resourceId": {
+      "$ref": "common/definitions.schema.json#/$defs/syntheticResourceId",
+      "description": "Must resolve to an entry of the approved synthetic source bundle used for this generation."
+    },
+    "resourceVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "fieldPath": {
+      "type": "string",
+      "pattern": "^(/([^/~]|~[01])*)+$",
+      "maxLength": 256,
+      "description": "RFC 6901 JSON Pointer into the resource content."
+    },
+    "fieldLabel": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Human-readable label a reviewer can scan quickly."
+    },
+    "statementExcerpt": {
+      "type": "string",
+      "maxLength": 256,
+      "description": "Short excerpt of the generated statement this reference supports."
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "contractVersion": "1.0.0",
+  "synthetic": true,
+  "syntheticDatasetVersion": "1.0.0",
+  "organizationId": "harborlight",
+  "terminologyPack": "harborlight-pediatrics",
+  "patient": {
+    "synthetic": true,
+    "syntheticPatientId": "SYN-PAT-PED0001A",
+    "fhirResourceType": "Patient",
+    "displayName": "Sample Patient Aurora Testcase",
+    "birthDate": "2018-04-11",
+    "gender": "female",
+    "careTeamRef": "SYN-PRAC-RN000001",
+    "mrn": "00248117"
+  },
+  "encounter": {
+    "synthetic": true,
+    "syntheticEncounterId": "SYN-ENC-PEDENC001",
+    "fhirResourceType": "Encounter",
+    "patientRef": "SYN-PAT-PED0001A",
+    "status": "in-progress",
+    "class": "IMP",
+    "periodStart": "2026-08-11T19:00:00Z",
+    "displayLabel": "Synthetic pediatric inpatient encounter, night shift",
+    "careSettingLabel": "Pediatric inpatient unit",
+    "pilotUnit": "Synthetic pediatric pilot unit"
+  },
+  "confirmation": {
+    "correlationId": "CORR-20260812-9f2a4c7d1b6e48a0b3c5d7e9f1a2b4c6",
+    "preGenerationConfirmedAt": "2026-08-12T06:45:10Z",
+    "preApprovalConfirmedAt": "2026-08-12T06:52:44Z",
+    "confirmedByRef": "USR-RN0000000001",
+    "confirmedByRoleCode": "registered-nurse"
+  }
+}

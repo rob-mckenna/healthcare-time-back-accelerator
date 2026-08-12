@@ -1,0 +1,21 @@
+{
+  "contractVersion": "1.0.0",
+  "auditEventId": "AUD-20260812A006",
+  "eventType": "decision",
+  "correlationId": "CORR-20260812-9f2a4c7d1b6e48a0b3c5d7e9f1a2b4c6",
+  "occurredAt": "2026-08-12T06:52:47Z",
+  "organizationId": "harborlight",
+  "actorRef": "USR-RN0000000001",
+  "actorType": "human",
+  "actorRoleCode": "registered-nurse",
+  "outcome": "success",
+  "syntheticPatientId": "SYN-PAT-PED0001A",
+  "syntheticEncounterId": "SYN-ENC-PEDENC001",
+  "artifactId": "ART-20260812A001",
+  "artifactVersion": "1.0.0",
+  "generationId": "GEN-20260812A001",
+  "approvalEventId": "APR-20260812A001",
+  "decisionReasonPresent": false,
+  "revisionNumber": 0,
+  "narrative": "Patient had a difficult night and the family was updated at the bedside."
+}

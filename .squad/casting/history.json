@@ -1,0 +1,22 @@
+{
+  "universe_usage_history": [
+    {
+      "universe": "The Matrix",
+      "assignment_id": "option-a-20260812",
+      "used_at": "2026-08-12T06:51:45.182-04:00"
+    }
+  ],
+  "assignment_cast_snapshots": {
+    "option-a-20260812": {
+      "universe": "The Matrix",
+      "agents": {
+        "lead-architect-integrator": "Trinity",
+        "healthcare-workflow-story": "Switch",
+        "copilot-studio-engineer": "Tank",
+        "foundry-agent-engineer": "Neo",
+        "data-security-quality": "Morpheus"
+      },
+      "created_at": "2026-08-12T06:51:45.182-04:00"
+    }
+  }
+}

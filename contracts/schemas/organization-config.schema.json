@@ -1,0 +1,360 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.second-shift-accelerator.example/v1/organization-config.schema.json",
+  "title": "Organization configuration pack",
+  "description": "Reusable organization, persona, terminology, brand, and operational configuration. Core agent and workflow logic must read every organization-specific value from this contract. Harborlight is an example pack only. Environment-specific values are declared by variable name and are never carried as values here.",
+  "type": "object",
+  "required": [
+    "contractVersion",
+    "organizationId",
+    "solution",
+    "personas",
+    "careContext",
+    "terminology",
+    "brand",
+    "data",
+    "operations",
+    "safetyCopy",
+    "illustrativeMetrics",
+    "environmentBindings"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": {
+      "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/contractVersion"
+    },
+    "organizationId": {
+      "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/organizationId",
+      "description": "Token {{ORGANIZATION_ID}}."
+    },
+    "organizationName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Token {{ORGANIZATION_NAME}}."
+    },
+    "solution": {
+      "type": "object",
+      "required": ["solutionName", "primaryWorkflow"],
+      "additionalProperties": false,
+      "properties": {
+        "solutionName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Token {{SOLUTION_NAME}}."
+        },
+        "primaryWorkflow": {
+          "type": "string",
+          "const": "shift-closeout",
+          "description": "Token {{PRIMARY_WORKFLOW}}. Option A locks this to the single shift-closeout workflow."
+        },
+        "pilotLabel": {
+          "type": "string",
+          "maxLength": 96,
+          "description": "Token {{PILOT_LABEL}}. Name the organization uses for the controlled pilot."
+        }
+      }
+    },
+    "personas": {
+      "type": "object",
+      "required": ["primaryPersonaName", "primaryPersonaRole", "endUserRole"],
+      "additionalProperties": false,
+      "properties": {
+        "primaryPersonaName": {
+          "type": "string",
+          "maxLength": 96,
+          "description": "Token {{PRIMARY_PERSONA_NAME}}. Fictional persona name only."
+        },
+        "primaryPersonaRole": {
+          "type": "string",
+          "maxLength": 96,
+          "description": "Token {{PRIMARY_PERSONA_ROLE}}."
+        },
+        "endUserRole": {
+          "type": "string",
+          "maxLength": 96,
+          "description": "Token {{END_USER_ROLE}}. Display label for the end user."
+        },
+        "endUserRolePlural": {
+          "type": "string",
+          "maxLength": 96,
+          "description": "Token {{END_USER_ROLE_PLURAL}}."
+        },
+        "careTeamNoun": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Token {{CARE_TEAM_NOUN}}."
+        },
+        "authorizedRoleCodes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/userRoleCode"
+          },
+          "description": "Role codes permitted to request a draft and to record a decision."
+        }
+      }
+    },
+    "careContext": {
+      "type": "object",
+      "required": ["careSetting", "pilotUnit"],
+      "additionalProperties": false,
+      "properties": {
+        "careSetting": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Token {{CARE_SETTING}}."
+        },
+        "pilotUnit": {
+          "type": "string",
+          "maxLength": 96,
+          "description": "Token {{PILOT_UNIT}}."
+        },
+        "unitNoun": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "Token {{UNIT_NOUN}}. Unit, ward, floor, pod, or bay."
+        },
+        "ehrSystemLabel": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Token {{EHR_SYSTEM}}. In Option A this is always a synthetic simulator label."
+        }
+      }
+    },
+    "terminology": {
+      "type": "object",
+      "required": ["terminologyPack", "locale", "shiftLabel", "handoffFormatLabel"],
+      "additionalProperties": false,
+      "properties": {
+        "terminologyPack": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Token {{TERMINOLOGY_PACK}}."
+        },
+        "locale": {
+          "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/locale"
+        },
+        "shiftLabel": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Token {{SHIFT_LABEL}}. Shift closeout, shift handoff, or end-of-shift report."
+        },
+        "handoffFormatLabel": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Token {{HANDOFF_FORMAT_LABEL}}. Name of the documented handoff structure the organization already uses. It is a referenced convention, not a standard endorsed by this accelerator."
+        },
+        "sourceReferenceLabel": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Token {{SOURCE_REFERENCE_LABEL}}."
+        },
+        "approvalActionLabel": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "Token {{APPROVAL_ACTION_LABEL}}. Display verb only. The recorded decision value is fixed by contract."
+        },
+        "timeBackMetricLabel": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Token {{TIME_BACK_METRIC_LABEL}}."
+        }
+      }
+    },
+    "brand": {
+      "type": "object",
+      "required": ["brandName", "brandAssetPath"],
+      "additionalProperties": false,
+      "properties": {
+        "brandName": {
+          "type": "string",
+          "maxLength": 96,
+          "description": "Token {{BRAND_NAME}}."
+        },
+        "brandAssetPath": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._/-]{1,200}$",
+          "description": "Token {{BRAND_ASSET_PATH}}. Repository-relative path. Absolute paths and URLs are rejected."
+        }
+      }
+    },
+    "data": {
+      "type": "object",
+      "required": ["syntheticOnly", "fhirDataPath", "syntheticDatasetVersion"],
+      "additionalProperties": false,
+      "properties": {
+        "syntheticOnly": {
+          "type": "boolean",
+          "const": true,
+          "description": "Structural lock. An organization pack cannot declare a non-synthetic data source in this accelerator."
+        },
+        "fhirDataPath": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._/-]{1,200}$",
+          "description": "Token {{FHIR_DATA_PATH}}. Repository-relative path to the synthetic dataset."
+        },
+        "syntheticDatasetVersion": {
+          "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/contractVersion"
+        }
+      }
+    },
+    "operations": {
+      "type": "object",
+      "required": [
+        "maxRevisions",
+        "agentTimeoutMs",
+        "inputContractVersion",
+        "outputContractVersion",
+        "groundingThreshold"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "maxRevisions": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Maximum revision requests allowed in one run before the workflow fails closed."
+        },
+        "agentTimeoutMs": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 300000,
+          "description": "Timeout for one agent invocation."
+        },
+        "inputContractVersion": {
+          "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/contractVersion"
+        },
+        "outputContractVersion": {
+          "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/contractVersion"
+        },
+        "groundingThreshold": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 1,
+          "description": "Minimum acceptable grounding coverage ratio. Option A requires fully referenced output, so the only permitted value is 1."
+        },
+        "auditRetentionLabel": {
+          "type": "string",
+          "maxLength": 160,
+          "description": "Token {{AUDIT_RETENTION_LABEL}}. User-facing statement about how long evidence is kept in this demonstration."
+        }
+      }
+    },
+    "safetyCopy": {
+      "type": "object",
+      "required": ["mandatoryDraftPrefix", "disclaimerBody", "syntheticDataNotice"],
+      "additionalProperties": false,
+      "properties": {
+        "mandatoryDraftPrefix": {
+          "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/draftStatus",
+          "description": "Non-removable prefix. An organization pack may extend the disclaimer body but can never replace or omit this prefix."
+        },
+        "disclaimerBody": {
+          "type": "string",
+          "minLength": 40,
+          "maxLength": 512,
+          "description": "Token {{DISCLAIMER_TEXT_OVERRIDE}}. Organization-supplied disclaimer body rendered after the mandatory prefix. Required, so an empty configuration can never silently remove the disclaimer."
+        },
+        "syntheticDataNotice": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 256,
+          "description": "Token {{SYNTHETIC_DATA_NOTICE}}. User-facing confirmation that the data is synthetic."
+        },
+        "errorMessageOverrides": {
+          "type": "object",
+          "description": "Optional per-code user-visible message overrides. Keys are fail-closed codes.",
+          "propertyNames": {
+            "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/failClosedCode"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 320
+          }
+        }
+      }
+    },
+    "illustrativeMetrics": {
+      "type": "object",
+      "description": "Illustrative time-back sample figures for the simple demonstration view. Every figure here is a simulated sample value under human configuration control, never a measured outcome, and never an environment or secret value. The metric contract reads its baseline and assisted durations from this block so no figure is hardcoded in application code.",
+      "required": [
+        "metricLabel",
+        "baselineDurationMinutes",
+        "assistedDurationMinutes",
+        "sampleBasisNote"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "metricLabel": {
+          "type": "string",
+          "const": "ILLUSTRATIVE",
+          "description": "Structural lock. An organization pack cannot declare time-back figures under any other label."
+        },
+        "baselineDurationMinutes": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 480,
+          "description": "Illustrative duration of the unassisted shift-closeout workflow for this organization's demonstration scenario."
+        },
+        "assistedDurationMinutes": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 480,
+          "description": "Illustrative duration of the assisted shift-closeout workflow. Must not exceed baselineDurationMinutes; the illustrative-metrics-config-arithmetic cross-field rule checks this."
+        },
+        "metricIdPrefix": {
+          "type": "string",
+          "pattern": "^MET-[A-Z0-9-]{2,16}$",
+          "description": "Optional prefix used to mint the metricId shown in the view."
+        },
+        "periodLabel": {
+          "type": "string",
+          "maxLength": 64,
+          "description": "Optional label for the illustrative period, for example a synthetic pilot week."
+        },
+        "sampleBasisNote": {
+          "type": "string",
+          "minLength": 40,
+          "maxLength": 256,
+          "pattern": "ILLUSTRATIVE",
+          "description": "Human-readable statement of what the figures are and are not. The pattern requires the literal token ILLUSTRATIVE, so a pack cannot describe these figures as measured results."
+        }
+      }
+    },
+    "environmentBindings": {
+      "type": "object",
+      "description": "Maps logical environment settings to environment variable names. Values are supplied at run time from the environment and are never committed. Tokens {{AZURE_REGION}}, {{FOUNDRY_PROJECT_ENDPOINT}}, {{FOUNDRY_AGENT_ID}}, and {{COPILOT_ENVIRONMENT_ID}} resolve through this map.",
+      "required": [
+        "azureRegion",
+        "foundryProjectEndpoint",
+        "foundryAgentId",
+        "copilotEnvironmentId"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "azureRegion": {
+          "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/environmentVariableName"
+        },
+        "foundryProjectEndpoint": {
+          "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/environmentVariableName"
+        },
+        "foundryAgentId": {
+          "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/environmentVariableName"
+        },
+        "copilotEnvironmentId": {
+          "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/environmentVariableName"
+        },
+        "auditEventSink": {
+          "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/environmentVariableName"
+        },
+        "approvalEventSink": {
+          "$ref": "https://contracts.second-shift-accelerator.example/v1/common/definitions.schema.json#/$defs/environmentVariableName"
+        }
+      }
+    }
+  }
+}

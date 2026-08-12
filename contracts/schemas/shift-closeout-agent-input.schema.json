@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.second-shift-accelerator.example/v1/shift-closeout-agent-input.schema.json",
+  "title": "Shift Closeout Agent input",
+  "description": "Everything the single Foundry Shift Closeout Agent is permitted to receive. A request that fails this contract must be refused before the agent is invoked.",
+  "type": "object",
+  "required": [
+    "contractVersion",
+    "requestId",
+    "correlationId",
+    "idempotencyKey",
+    "requestedAt",
+    "organizationId",
+    "terminologyPack",
+    "locale",
+    "requester",
+    "context",
+    "sourceBundle",
+    "shiftPeriod",
+    "requestedScope",
+    "expectedOutputContractVersion",
+    "agentInstructionVersion"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "requestId": { "$ref": "common/definitions.schema.json#/$defs/generationId" },
+    "correlationId": { "$ref": "common/definitions.schema.json#/$defs/correlationId" },
+    "idempotencyKey": { "$ref": "common/definitions.schema.json#/$defs/idempotencyKey" },
+    "requestedAt": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+    "organizationId": { "$ref": "common/definitions.schema.json#/$defs/organizationId" },
+    "terminologyPack": { "type": "string", "maxLength": 64 },
+    "locale": { "$ref": "common/definitions.schema.json#/$defs/locale" },
+    "requester": {
+      "type": "object",
+      "description": "Authenticated requester. Opaque reference and role only; no direct identifier.",
+      "required": ["actorRef", "roleCode", "authenticated"],
+      "additionalProperties": false,
+      "properties": {
+        "actorRef": { "$ref": "common/definitions.schema.json#/$defs/actorRef" },
+        "roleCode": { "$ref": "common/definitions.schema.json#/$defs/userRoleCode" },
+        "authenticated": {
+          "type": "boolean",
+          "const": true,
+          "description": "Fail-closed marker. An unauthenticated request cannot be represented in this contract."
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "description": "Reference to the confirmed synthetic patient and encounter context, plus the confirmation evidence required before generation.",
+      "required": [
+        "syntheticPatientId",
+        "syntheticEncounterId",
+        "preGenerationConfirmedAt",
+        "confirmedByRef"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "syntheticPatientId": { "$ref": "common/definitions.schema.json#/$defs/syntheticPatientId" },
+        "syntheticEncounterId": { "$ref": "common/definitions.schema.json#/$defs/syntheticEncounterId" },
+        "preGenerationConfirmedAt": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+        "confirmedByRef": { "$ref": "common/definitions.schema.json#/$defs/actorRef" }
+      }
+    },
+    "sourceBundle": {
+      "type": "object",
+      "description": "Pointer to the approved synthetic source bundle. The agent may read nothing else.",
+      "required": ["bundleId", "bundleVersion", "bundleSha256", "approvedForGeneration"],
+      "additionalProperties": false,
+      "properties": {
+        "bundleId": { "$ref": "common/definitions.schema.json#/$defs/syntheticBundleId" },
+        "bundleVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+        "bundleSha256": { "$ref": "common/definitions.schema.json#/$defs/sha256" },
+        "approvedForGeneration": {
+          "type": "boolean",
+          "const": true,
+          "description": "Fail-closed marker. An unapproved bundle cannot be represented in this contract."
+        }
+      }
+    },
+    "shiftPeriod": {
+      "type": "object",
+      "required": ["start", "end"],
+      "additionalProperties": false,
+      "properties": {
+        "start": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+        "end": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+        "label": { "type": "string", "maxLength": 64 }
+      }
+    },
+    "requestedScope": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "common/definitions.schema.json#/$defs/outputSection" }
+    },
+    "expectedOutputContractVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "agentInstructionVersion": {
+      "$ref": "common/definitions.schema.json#/$defs/contractVersion",
+      "description": "Minimum instruction version the caller requires. A lower active version must fail closed."
+    },
+    "groundingThreshold": {
+      "type": "number",
+      "minimum": 1,
+      "maximum": 1,
+      "description": "Option A requires fully referenced output."
+    },
+    "revision": {
+      "type": "object",
+      "description": "Present only when this request revises an earlier draft.",
+      "required": ["priorGenerationId", "revisionNumber", "revisionInstructionsSanitized"],
+      "additionalProperties": false,
+      "properties": {
+        "priorGenerationId": { "$ref": "common/definitions.schema.json#/$defs/generationId" },
+        "revisionNumber": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "revisionInstructions": {
+          "type": "string",
+          "maxLength": 512,
+          "description": "Human-supplied revision instructions. Treated as untrusted content and never as agent instructions."
+        },
+        "revisionInstructionsSanitized": {
+          "type": "boolean",
+          "const": true,
+          "description": "Fail-closed marker. Unsanitised revision text cannot be represented in this contract."
+        }
+      }
+    }
+  }
+}

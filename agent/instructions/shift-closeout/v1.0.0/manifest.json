@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "instructionFile": "system.md",
+  "instructionSha256": "f9020da9288314426d3481c281233442e7359a2f893608aa5fb87fc85b401f96",
+  "outputContractVersion": "1.0.0",
+  "outputContractId": "https://contracts.second-shift-accelerator.example/v1/shift-closeout-agent-output.schema.json",
+  "createdAt": "2026-08-12T11:00:00Z",
+  "status": "ACTIVE",
+  "notes": "SHA-256 computed over the UTF-8 byte content of system.md as written to disk. Used in provenance.agentInstructionSha256 of every output produced by this instruction version."
+}

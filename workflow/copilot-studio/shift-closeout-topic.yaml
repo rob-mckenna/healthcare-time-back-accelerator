@@ -1,0 +1,339 @@
+# SIMULATION BOUNDARY — Copilot Studio topic flow specification
+#
+# This file specifies the shift-closeout topic flow in structured YAML.
+# It is a DESIGN SPECIFICATION, not a deployable Copilot Studio authoring file.
+#
+# Live Copilot Studio configuration requires:
+#   BLOCKER-001 (docs/risks.md) — invocation model must be verified
+#   BLOCKER-002 (docs/risks.md) — role claim availability must be verified
+#
+# Per ADR-20260812-010, this file does not contain working platform configuration
+# for unverified product behavior. Every node marked [BLOCKED-001] or [BLOCKED-002]
+# requires the corresponding human decision before it can be implemented.
+#
+# REQ IDs: REQ-WF-001 through REQ-WF-007, REQ-SCOPE-001, REQ-SCOPE-004
+
+topic:
+  name: ShiftCloseout
+  kind: standard
+  description: >
+    Care-team shift-closeout experience. Authenticated nurse requests a draft,
+    confirms synthetic patient and encounter, receives a structured Foundry draft,
+    inspects source references, and records an approve/reject/revise decision.
+    Every step is fail-closed. The draft is always labeled DRAFT — HUMAN REVIEW REQUIRED.
+
+  trigger:
+    phrases:
+      - "close out my shift"
+      - "shift closeout"
+      - "end of shift summary"
+    # Additional phrases come from the organization config terminologyPack.
+    # No hardcoded organization-specific phrases here.
+
+  # ─── Step 1: Authentication and authorization ──────────────────────────────
+  nodes:
+    - id: authenticate
+      kind: action
+      label: "Authenticate user (System.AuthenticateUser)"
+      # [BLOCKED-002] Role claim resolution. See docs/risks.md BLOCKER-002.
+      binding: System.AuthenticateUser
+      onFailure:
+        failClosedCode: E-IDENTITY-MISSING
+        action: surfaceErrorMessage
+        end: true
+
+    - id: resolveRole
+      kind: action
+      label: "Resolve roleCode from authenticated session"
+      # [BLOCKED-002] Whether directory role claims are available in the target
+      # tenant and in what shape is not verified. When BLOCKER-002 is resolved,
+      # this node binds to the verified claim source or proxy-flow lookup.
+      simulationBoundary: "BLOCKER-002 — role claim source pending human decision"
+      onMissing:
+        failClosedCode: E-IDENTITY-MISSING
+        action: surfaceErrorMessage
+        end: true
+      onUnauthorized:
+        failClosedCode: E-IDENTITY-MISSING
+        action: surfaceErrorMessage
+        end: true
+
+    - id: mintCorrelationId
+      kind: action
+      label: "Mint one correlation identifier for this run"
+      format: "CORR-{YYYYMMDD}-{32 lowercase hex chars from CSPRNG}"
+      display: "short reference = last 8 chars, shown as 'Ref {hex}'"
+      notes: >
+        Minted once. Carried through every turn. Echoed by agent output,
+        approval event, and every audit event. Mismatch is fail-closed.
+      implementation: src/orchestration/correlation.mjs
+
+    - id: auditRequest
+      kind: audit
+      eventType: request
+      onFailure:
+        failClosedCode: E-AUDIT-WRITE-FAILURE
+        action: surfaceErrorMessage
+        end: true
+
+    # ─── Step 2: Patient and encounter confirmation ─────────────────────────
+    - id: presentContext
+      kind: message
+      label: "Present synthetic patient and encounter for confirmation"
+      content:
+        - type: card
+          fields:
+            - label: "Patient reference"
+              value: "{syntheticPatientId}"    # carries SYN-PAT- prefix
+            - label: "Encounter reference"
+              value: "{syntheticEncounterId}"  # carries SYN-ENC- prefix
+            - label: "Data notice"
+              value: "{safetyCopy.syntheticDataNotice}"
+        - type: question
+          text: "Is this the correct patient and encounter for your shift closeout?"
+          options: ["Yes, proceed", "No, cancel"]
+
+    - id: assertPreGenerationConfirmed
+      kind: branch
+      onNo:
+        failClosedCode: E-CONTEXT-UNCONFIRMED
+        action: surfaceErrorMessage
+        end: true
+      onYes:
+        action: recordConfirmation
+        # Records preGenerationConfirmedAt (UTC ISO-8601) and confirmedByRef
+      implementation: src/orchestration/context-guard.mjs#assertPreGenerationConfirmed
+
+    - id: auditContextConfirmation
+      kind: audit
+      eventType: context-confirmation
+      onFailure:
+        failClosedCode: E-AUDIT-WRITE-FAILURE
+        action: surfaceErrorMessage
+        end: true
+
+    # ─── Step 3: Draft generation ───────────────────────────────────────────
+    - id: showProgress
+      kind: message
+      text: "Preparing your {terminology.shiftLabel} draft…"
+
+    - id: buildAgentInput
+      kind: action
+      label: "Build and validate agent input"
+      schema: contracts/schemas/shift-closeout-agent-input.schema.json
+      onFailure:
+        failClosedCode: E-INPUT-SCHEMA-INVALID
+        action: surfaceErrorMessage
+        end: true
+      implementation: src/orchestration/input-builder.mjs
+
+    - id: invokeFoundryAgent
+      kind: action
+      label: "Invoke Shift Closeout Agent"
+      # [BLOCKED-001] The Copilot Studio to Foundry invocation model is unverified.
+      # When BLOCKER-001 is resolved:
+      #   Option 1 (recommended): Power Automate proxy flow as the binding.
+      #   Option 2: Direct Copilot Studio action if a supported mechanism is verified.
+      simulationBoundary: "BLOCKER-001 — invocation model pending human decision"
+      timeout: "{operations.agentTimeoutMs} ms"
+      onTimeout:
+        failClosedCode: E-AGENT-TIMEOUT
+        action: surfaceErrorMessage
+        end: true
+      onError:
+        failClosedCode: E-AGENT-ERROR
+        action: surfaceErrorMessage
+        end: true
+      implementation: src/orchestration/foundry-adapter.mjs
+
+    - id: validateOutput
+      kind: action
+      label: "Run deterministic post-generation validation"
+      steps:
+        - "1. Output schema validation     → E-OUTPUT-SCHEMA-INVALID"
+        - "2. Safety assertion check (×9)  → E-SAFETY-FLAG"
+        - "3. Grounding resolution          → E-GROUNDING-FAILURE"
+        - "4. Correlation echo check        → E-OUTPUT-SCHEMA-INVALID"
+      notes: >
+        All four steps run in order. A failure at any step stops the run.
+        No partial draft is shown.
+      onFailure:
+        action: surfaceErrorMessage
+        end: true
+      implementation: src/orchestration/output-validator.mjs
+
+    - id: auditGeneration
+      kind: audit
+      eventType: generation
+      fields:
+        schemaValidationPassed: true
+        groundingVerified: true
+      onFailure:
+        failClosedCode: E-AUDIT-WRITE-FAILURE
+        action: surfaceErrorMessage
+        end: true
+
+    - id: renderDraft
+      kind: message
+      label: "Render the validated draft"
+      mandatory:
+        - "DRAFT — HUMAN REVIEW REQUIRED   (draftStatus — immutable)"
+        - "{safetyCopy.disclaimerBody}"
+        - "{safetyCopy.syntheticDataNotice}"
+        - "Ref {shortRef}"
+        - "Source references for each section"
+      notes: >
+        If any mandatory element cannot be rendered, this surface does not render
+        the draft. The draft label never changes, including after approval.
+
+    - id: auditPresentation
+      kind: audit
+      eventType: presentation
+      onFailure:
+        failClosedCode: E-AUDIT-WRITE-FAILURE
+        action: surfaceErrorMessage
+        end: true
+
+    # ─── Step 4: Source reference inspection ────────────────────────────────
+    - id: sourceReferenceControls
+      kind: interactive
+      label: "Source reference inspection"
+      perSection: true
+      actions:
+        - label: "Show references"
+          shows: "fieldLabel + statementExcerpt for each sourceReference"
+        - label: "View source"
+          shows: "underlying synthetic resource field content"
+      onUnresolvable:
+        failClosedCode: E-GROUNDING-FAILURE
+        action: surfaceErrorMessage
+        end: true
+
+    # ─── Step 5: Human decision ──────────────────────────────────────────────
+    - id: decisionPrompt
+      kind: question
+      text: "What would you like to do with this draft?"
+      options:
+        - label: "{terminology.approvalActionLabel}"   # e.g. "Approve"
+          value: approved
+        - label: "Reject"
+          value: rejected
+        - label: "Request revision"
+          value: revision-requested
+
+    - id: approvalPath
+      kind: branch
+      when: decision == approved
+      nodes:
+        - id: reconfirmContext
+          kind: message
+          label: "Re-present patient and encounter for approval confirmation"
+          notes: >
+            Second, independent confirmation. preApprovalConfirmedAt recorded now.
+            Patient and encounter must match the generation-gate values exactly.
+          onMismatch:
+            failClosedCode: E-APPROVAL-WITHOUT-CONFIRMATION
+            action: surfaceErrorMessage
+            end: true
+          onMissing:
+            failClosedCode: E-APPROVAL-WITHOUT-CONFIRMATION
+            action: surfaceErrorMessage
+            end: true
+          implementation: src/orchestration/context-guard.mjs#assertPreApprovalConfirmed
+
+        - id: recordApproval
+          kind: action
+          implementation: src/orchestration/approval-orchestrator.mjs#recordDecision
+          onFailure:
+            action: surfaceErrorMessage
+            end: true
+
+        - id: showApprovalResult
+          kind: message
+          content:
+            - "APPROVED — SIMULATED FINALIZATION ONLY"
+            - "No record has been written to any system of record."
+            - "This is a simulated prototype approval event."
+            - "Ref {shortRef}"
+
+    - id: rejectPath
+      kind: branch
+      when: decision == rejected
+      nodes:
+        - id: requireReason
+          kind: question
+          text: "Please provide a reason for rejection (required)."
+          validation: "required; max 512 chars; scanned for prohibited content"
+          onEmpty:
+            failClosedCode: E-APPROVAL-WITHOUT-CONFIRMATION
+            action: surfaceErrorMessage
+
+        - id: recordRejection
+          kind: action
+          implementation: src/orchestration/approval-orchestrator.mjs#recordDecision
+          onFailure:
+            action: surfaceErrorMessage
+            end: true
+
+        - id: showRejectionResult
+          kind: message
+          content:
+            - "REJECTED — NOT FOR USE"
+            - "Ref {shortRef}"
+
+    - id: revisionPath
+      kind: branch
+      when: decision == revision-requested
+      nodes:
+        - id: checkRevisionLimit
+          kind: condition
+          check: "revisionCount < operations.maxRevisions"
+          onLimitReached:
+            failClosedCode: E-REVISION-LIMIT-REACHED
+            action: surfaceErrorMessage
+            end: true
+
+        - id: requireRevisionInstructions
+          kind: question
+          text: "Please describe the revision needed (required)."
+          validation: "required; max 512 chars; scanned before use"
+
+        - id: loopToGeneration
+          kind: goto
+          target: buildAgentInput
+          notes: >
+            Revision request increments revisionNumber and passes prior
+            generationId and sanitized revision instructions to the next input.
+
+    - id: auditDecision
+      kind: audit
+      eventType: decision
+      onFailure:
+        failClosedCode: E-AUDIT-WRITE-FAILURE
+        action: surfaceErrorMessage
+        end: true
+
+    # ─── Step 6: Correlated evidence view ───────────────────────────────────
+    - id: evidenceView
+      kind: message
+      label: "Correlated audit evidence"
+      content:
+        - "Correlation: {correlationId}  Ref {shortRef}"
+        - "Events: request → context-confirmation → generation → presentation → decision"
+        - "Each event: type, timestamp, outcome, fail-closed code (if any)"
+        - >
+          ILLUSTRATIVE time-back view — figures are illustrative and derived from a
+          synthetic example scenario. Not measured care-team or organizational outcomes.
+      implementation: src/orchestration/shift-closeout-runner.mjs#queryEvidence
+
+  # ─── Global error surface ───────────────────────────────────────────────────
+  errorSurface:
+    rule: >
+      Every fail-closed code maps to safetyCopy.errorMessageOverrides in the
+      organization pack. Raw exceptions, stack traces, endpoints, agent prompt
+      fragments, and payload field values are never rendered.
+    alwaysInclude:
+      - "Ref {shortRef}"
+      - "Configured user-safe message from errorMessageOverrides"
+    catalog: docs/workflow/fail-closed-catalog.md
+    implementation: src/orchestration/config-loader.mjs#resolveUserSafeMessage

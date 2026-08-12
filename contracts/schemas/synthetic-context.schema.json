@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.second-shift-accelerator.example/v1/synthetic-context.schema.json",
+  "title": "Confirmed synthetic patient and encounter context",
+  "description": "The synthetic patient and encounter a human explicitly confirmed before generation. Structural markers make a real record shape invalid. No PHI or PII may appear in this contract.",
+  "type": "object",
+  "required": [
+    "contractVersion",
+    "synthetic",
+    "syntheticDatasetVersion",
+    "organizationId",
+    "patient",
+    "encounter",
+    "confirmation"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "synthetic": {
+      "type": "boolean",
+      "const": true,
+      "description": "Structural synthetic marker. Absence or any other value fails validation."
+    },
+    "syntheticDatasetVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "organizationId": { "$ref": "common/definitions.schema.json#/$defs/organizationId" },
+    "terminologyPack": { "type": "string", "maxLength": 64 },
+    "patient": {
+      "type": "object",
+      "required": [
+        "synthetic",
+        "syntheticPatientId",
+        "fhirResourceType",
+        "displayName",
+        "birthDate",
+        "gender"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": { "type": "boolean", "const": true },
+        "syntheticPatientId": { "$ref": "common/definitions.schema.json#/$defs/syntheticPatientId" },
+        "fhirResourceType": { "type": "string", "const": "Patient" },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96,
+          "description": "Fictional display name used to confirm the correct synthetic record. Must be recognisably fictional."
+        },
+        "birthDate": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$",
+          "description": "Fictional date of birth. Date precision only; no birth time."
+        },
+        "gender": {
+          "type": "string",
+          "enum": ["male", "female", "other", "unknown"]
+        },
+        "careTeamRef": { "$ref": "common/definitions.schema.json#/$defs/syntheticPractitionerId" }
+      },
+      "propertyNames": {
+        "description": "Named denylist of direct-identifier fields, in addition to the closed property set above.",
+        "not": {
+          "enum": [
+            "ssn",
+            "socialSecurityNumber",
+            "taxId",
+            "mrn",
+            "medicalRecordNumber",
+            "patientAccountNumber",
+            "address",
+            "streetAddress",
+            "postalCode",
+            "phone",
+            "telecom",
+            "email",
+            "insuranceId",
+            "memberId",
+            "photo",
+            "nextOfKin",
+            "emergencyContact",
+            "birthDateTime"
+          ]
+        }
+      }
+    },
+    "encounter": {
+      "type": "object",
+      "required": [
+        "synthetic",
+        "syntheticEncounterId",
+        "fhirResourceType",
+        "patientRef",
+        "status",
+        "class",
+        "periodStart",
+        "displayLabel"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "synthetic": { "type": "boolean", "const": true },
+        "syntheticEncounterId": { "$ref": "common/definitions.schema.json#/$defs/syntheticEncounterId" },
+        "fhirResourceType": { "type": "string", "const": "Encounter" },
+        "patientRef": { "$ref": "common/definitions.schema.json#/$defs/syntheticPatientId" },
+        "status": {
+          "type": "string",
+          "enum": ["planned", "in-progress", "onhold", "completed", "cancelled", "entered-in-error", "unknown"]
+        },
+        "class": {
+          "type": "string",
+          "enum": ["IMP", "AMB", "EMER", "OBSENC", "PRENC", "SS", "VR", "HH"],
+          "description": "FHIR encounter class code."
+        },
+        "periodStart": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+        "periodEnd": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+        "displayLabel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Human-readable encounter label used at both confirmation gates."
+        },
+        "careSettingLabel": { "type": "string", "maxLength": 128 },
+        "pilotUnit": { "type": "string", "maxLength": 96 }
+      },
+      "propertyNames": {
+        "description": "Named denylist of facility-topology fields, in addition to the closed property set above.",
+        "not": {
+          "enum": ["roomNumber", "bedNumber", "wardName", "buildingCode", "exactLocation"]
+        }
+      }
+    },
+    "confirmation": {
+      "type": "object",
+      "description": "Evidence that a human explicitly confirmed this context. Both gates are required before an approval decision may be recorded.",
+      "required": ["preGenerationConfirmedAt", "confirmedByRef", "confirmedByRoleCode", "correlationId"],
+      "additionalProperties": false,
+      "properties": {
+        "correlationId": { "$ref": "common/definitions.schema.json#/$defs/correlationId" },
+        "preGenerationConfirmedAt": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+        "preApprovalConfirmedAt": {
+          "$ref": "common/definitions.schema.json#/$defs/utcTimestamp",
+          "description": "Second confirmation, recorded immediately before a decision is submitted."
+        },
+        "confirmedByRef": { "$ref": "common/definitions.schema.json#/$defs/actorRef" },
+        "confirmedByRoleCode": { "$ref": "common/definitions.schema.json#/$defs/userRoleCode" }
+      }
+    }
+  }
+}

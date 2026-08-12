@@ -1,0 +1,93 @@
+{
+  "contractVersion": "1.0.0",
+  "synthetic": true,
+  "bundleId": "SYN-BDL-PEDBDL01",
+  "bundleVersion": "1.0.0",
+  "bundleSha256": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+  "syntheticDatasetVersion": "1.0.0",
+  "organizationId": "harborlight",
+  "createdAt": "2026-08-12T06:40:00Z",
+  "approvedForGeneration": true,
+  "approvedByRef": "SYS-DATAGOV0001",
+  "approvedAt": "2026-08-12T06:41:00Z",
+  "entries": [
+    {
+      "synthetic": true,
+      "resourceType": "Patient",
+      "resourceId": "SYN-PAT-PED0001A",
+      "resourceVersion": "1.0.0",
+      "content": {
+        "resourceType": "Patient",
+        "id": "SYN-PAT-PED0001A",
+        "name": [{ "given": ["Aurora"], "family": "Testcase" }],
+        "birthDate": "2018-04-11",
+        "gender": "female"
+      }
+    },
+    {
+      "synthetic": true,
+      "resourceType": "Encounter",
+      "resourceId": "SYN-ENC-PEDENC001",
+      "resourceVersion": "1.0.0",
+      "content": {
+        "resourceType": "Encounter",
+        "id": "SYN-ENC-PEDENC001",
+        "status": "in-progress",
+        "class": { "code": "IMP" },
+        "subject": { "reference": "Patient/SYN-PAT-PED0001A" },
+        "period": { "start": "2026-08-11T19:00:00Z" }
+      }
+    },
+    {
+      "synthetic": true,
+      "resourceType": "Observation",
+      "resourceId": "SYN-OBS-OBS00001",
+      "resourceVersion": "1.0.0",
+      "content": {
+        "resourceType": "Observation",
+        "id": "SYN-OBS-OBS00001",
+        "status": "final",
+        "code": { "text": "Documented respiratory rate entry" },
+        "effectiveDateTime": "2026-08-11T23:15:00Z",
+        "valueQuantity": { "value": 22, "unit": "breaths/min" }
+      }
+    },
+    {
+      "synthetic": true,
+      "resourceType": "Task",
+      "resourceId": "SYN-TSK-TSK00001",
+      "resourceVersion": "1.0.0",
+      "content": {
+        "resourceType": "Task",
+        "id": "SYN-TSK-TSK00001",
+        "status": "in-progress",
+        "description": "Documented open item: education material handout not yet acknowledged.",
+        "priority": "routine"
+      }
+    },
+    {
+      "synthetic": true,
+      "resourceType": "CarePlan",
+      "resourceId": "SYN-CPL-CPL00001",
+      "resourceVersion": "1.0.0",
+      "content": {
+        "resourceType": "CarePlan",
+        "id": "SYN-CPL-CPL00001",
+        "status": "active",
+        "title": "Documented synthetic care plan entry",
+        "activity": [{ "detail": { "description": "Documented follow-up entry for next shift period." } }]
+      }
+    },
+    {
+      "synthetic": true,
+      "resourceType": "Practitioner",
+      "resourceId": "SYN-PRAC-RN000001",
+      "resourceVersion": "1.0.0",
+      "content": {
+        "resourceType": "Practitioner",
+        "id": "SYN-PRAC-RN000001",
+        "name": [{ "given": ["Sample"], "family": "Nurse-Testcase" }]
+      }
+    }
+  ]
+}

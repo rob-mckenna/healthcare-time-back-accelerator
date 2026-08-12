@@ -1,0 +1,5 @@
+# Neo History
+
+- 2026-08-12: Seeded for the Second Shift Reduction Accelerator Option A prototype. Human project owner: Rob McKenna. Governing charter: `SQUAD_BOOTSTRAP.md`.
+- 2026-08-12T06-51-45Z: Design Review closed. Contract-first baseline accepted. Scope: agent instructions/evaluations and src/agent. Trinity owns contracts/; Switch owns docs/narrative and docs/demo; Tank owns workflow and src/orchestration; Morpheus owns synthetic data, governance, dashboard, security/integration tests. Non-overlapping implementation authorized. See `orchestration-log/2026-08-12T06-51-45Z-design-review.md` and `decisions.md` for decisions and artifact registry.
+- 2026-08-12T06-51-45Z: P0 FINAL CLOSEOUT. Neo scope complete: Foundry Shift Closeout Agent definition and evaluation templates (local synthetic grounding 18/18 ✅; deterministic validators per ADR-008). Agent instructions locked. Parallel work complete across all agents. Exit 0 verified. Foundry evaluation NOT RUN (pending human decisions on BLOCKER-001/002/003). All outcomes recorded in `orchestration-log/2026-08-12T06-51-45Z-final-closeout.md`.

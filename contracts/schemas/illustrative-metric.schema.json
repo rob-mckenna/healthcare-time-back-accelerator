@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.second-shift-accelerator.example/v1/illustrative-metric.schema.json",
+  "title": "Illustrative time-back metric",
+  "description": "Sample and composite figures for the simple time-back view. The contract makes it structurally impossible to publish a figure from this accelerator without the ILLUSTRATIVE label, the provenance, and the disclaimer travelling with the value.",
+  "type": "object",
+  "required": [
+    "contractVersion",
+    "metricLabel",
+    "illustrative",
+    "notForClinicalUse",
+    "dataProvenance",
+    "disclaimerText",
+    "metricId",
+    "metricName",
+    "baselineDurationMinutes",
+    "assistedDurationMinutes",
+    "illustrativeTimeReturnedMinutes",
+    "draftOutcomeStatus",
+    "approvalCoverage"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "metricLabel": {
+      "type": "string",
+      "const": "ILLUSTRATIVE"
+    },
+    "illustrative": {
+      "type": "boolean",
+      "const": true,
+      "description": "Machine-readable flag carried on the value itself, so the label survives extraction of the raw number."
+    },
+    "notForClinicalUse": { "type": "boolean", "const": true },
+    "dataProvenance": {
+      "type": "string",
+      "enum": ["synthetic-simulated", "sample-composite", "manually-authored", "test-fixture"],
+      "description": "No enumerated value denotes a measured or observed outcome."
+    },
+    "disclaimerText": {
+      "type": "string",
+      "const": "ILLUSTRATIVE ONLY — simulated sample figures from synthetic data. Not a measured patient, care-team, or organizational outcome."
+    },
+    "metricId": { "type": "string", "pattern": "^MET-[A-Z0-9-]{4,24}$" },
+    "metricName": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "organizationId": { "$ref": "common/definitions.schema.json#/$defs/organizationId" },
+    "correlationId": { "$ref": "common/definitions.schema.json#/$defs/correlationId" },
+    "periodLabel": { "type": "string", "maxLength": 64 },
+    "baselineDurationMinutes": { "type": "number", "minimum": 0, "maximum": 480 },
+    "assistedDurationMinutes": { "type": "number", "minimum": 0, "maximum": 480 },
+    "illustrativeTimeReturnedMinutes": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 480,
+      "description": "Must equal baselineDurationMinutes minus assistedDurationMinutes. Arithmetic is checked by the contract validation script."
+    },
+    "draftOutcomeStatus": {
+      "type": "string",
+      "enum": ["accepted-as-drafted", "revised-before-approval", "rejected", "pending"]
+    },
+    "approvalCoverage": {
+      "type": "object",
+      "required": ["approvedCount", "totalCount", "coveragePercent"],
+      "additionalProperties": false,
+      "properties": {
+        "approvedCount": { "type": "integer", "minimum": 0 },
+        "totalCount": { "type": "integer", "minimum": 1 },
+        "coveragePercent": { "type": "number", "minimum": 0, "maximum": 100 }
+      }
+    }
+  }
+}

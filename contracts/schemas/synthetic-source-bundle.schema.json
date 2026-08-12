@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.second-shift-accelerator.example/v1/synthetic-source-bundle.schema.json",
+  "title": "Approved synthetic source bundle",
+  "description": "The minimal synthetic FHIR-shaped resource set the Shift Closeout Agent is permitted to read. The bundle is the system of record for the prototype. Generation is refused unless approvedForGeneration is true.",
+  "type": "object",
+  "required": [
+    "contractVersion",
+    "synthetic",
+    "bundleId",
+    "bundleVersion",
+    "bundleSha256",
+    "syntheticDatasetVersion",
+    "createdAt",
+    "approvedForGeneration",
+    "entries"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "synthetic": { "type": "boolean", "const": true },
+    "bundleId": { "$ref": "common/definitions.schema.json#/$defs/syntheticBundleId" },
+    "bundleVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "bundleSha256": {
+      "$ref": "common/definitions.schema.json#/$defs/sha256",
+      "description": "Digest of the canonical bundle content. Binds a draft and an approval to an exact source snapshot."
+    },
+    "syntheticDatasetVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "organizationId": { "$ref": "common/definitions.schema.json#/$defs/organizationId" },
+    "createdAt": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+    "approvedForGeneration": {
+      "type": "boolean",
+      "description": "Data-governance gate. The agent must refuse to read a bundle where this is false."
+    },
+    "approvedByRef": { "$ref": "common/definitions.schema.json#/$defs/actorRef" },
+    "approvedAt": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+    "entries": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 200,
+      "description": "Minimum necessary resources for the shift-closeout scenario. At least one Patient and one Encounter.",
+      "items": {
+        "type": "object",
+        "required": ["synthetic", "resourceType", "resourceId", "content"],
+        "additionalProperties": false,
+        "properties": {
+          "synthetic": { "type": "boolean", "const": true },
+          "resourceType": { "$ref": "common/definitions.schema.json#/$defs/fhirResourceType" },
+          "resourceId": { "$ref": "common/definitions.schema.json#/$defs/syntheticResourceId" },
+          "resourceVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+          "content": {
+            "type": "object",
+            "description": "FHIR-shaped synthetic content. Free-text values are bounded and sanitised by the validation layer before an agent reads them.",
+            "minProperties": 1
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "approvedForGeneration": { "const": true } }, "required": ["approvedForGeneration"] },
+      "then": { "required": ["approvedByRef", "approvedAt"] }
+    }
+  ]
+}

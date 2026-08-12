@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.second-shift-accelerator.example/v1/approval-event.schema.json",
+  "title": "Approval event",
+  "description": "The attributable human decision on a generated draft. No artifact may leave DRAFT without a valid instance of this contract. The event carries evidence, never generated content.",
+  "type": "object",
+  "required": [
+    "contractVersion",
+    "approvalEventId",
+    "correlationId",
+    "recordedAt",
+    "organizationId",
+    "decision",
+    "approver",
+    "artifact",
+    "reconfirmedContext",
+    "lifecycleStatus",
+    "statusLabel"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+    "approvalEventId": { "$ref": "common/definitions.schema.json#/$defs/approvalEventId" },
+    "correlationId": { "$ref": "common/definitions.schema.json#/$defs/correlationId" },
+    "recordedAt": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+    "organizationId": { "$ref": "common/definitions.schema.json#/$defs/organizationId" },
+    "decision": { "$ref": "common/definitions.schema.json#/$defs/decision" },
+    "approver": {
+      "type": "object",
+      "description": "Attributable but non-identifying. Display names are resolved from the organization pack at render time and are never stored in the event.",
+      "required": ["actorRef", "roleCode", "authenticated"],
+      "additionalProperties": false,
+      "properties": {
+        "actorRef": { "$ref": "common/definitions.schema.json#/$defs/actorRef" },
+        "roleCode": { "$ref": "common/definitions.schema.json#/$defs/userRoleCode" },
+        "authenticated": { "type": "boolean", "const": true }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "required": ["artifactId", "artifactVersion", "artifactSha256", "generationId", "agentInstructionVersion"],
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": { "$ref": "common/definitions.schema.json#/$defs/artifactId" },
+        "artifactVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" },
+        "artifactSha256": {
+          "$ref": "common/definitions.schema.json#/$defs/sha256",
+          "description": "Binds the decision to exact content. A replayed event against different content fails the digest check."
+        },
+        "generationId": { "$ref": "common/definitions.schema.json#/$defs/generationId" },
+        "agentInstructionVersion": { "$ref": "common/definitions.schema.json#/$defs/contractVersion" }
+      }
+    },
+    "reconfirmedContext": {
+      "type": "object",
+      "description": "Second patient and encounter confirmation, captured at decision time rather than carried forward from generation.",
+      "required": ["syntheticPatientId", "syntheticEncounterId", "preApprovalConfirmedAt", "sourceBundleSha256"],
+      "additionalProperties": false,
+      "properties": {
+        "syntheticPatientId": { "$ref": "common/definitions.schema.json#/$defs/syntheticPatientId" },
+        "syntheticEncounterId": { "$ref": "common/definitions.schema.json#/$defs/syntheticEncounterId" },
+        "preApprovalConfirmedAt": { "$ref": "common/definitions.schema.json#/$defs/utcTimestamp" },
+        "sourceBundleId": { "$ref": "common/definitions.schema.json#/$defs/syntheticBundleId" },
+        "sourceBundleSha256": { "$ref": "common/definitions.schema.json#/$defs/sha256" }
+      }
+    },
+    "decisionReason": {
+      "type": "string",
+      "maxLength": 512,
+      "description": "Free text supplied by the human. Required for rejection and revision. Scanned by the validation layer before it is written."
+    },
+    "decisionReasonScanned": {
+      "type": "boolean",
+      "const": true,
+      "description": "Fail-closed marker. An unscanned reason cannot be represented in this contract."
+    },
+    "revisionNumber": { "type": "integer", "minimum": 0, "maximum": 10 },
+    "previousApprovalEventId": { "$ref": "common/definitions.schema.json#/$defs/approvalEventId" },
+    "lifecycleStatus": {
+      "$ref": "common/definitions.schema.json#/$defs/lifecycleStatus",
+      "description": "Resulting lifecycle state. APPROVED-SIMULATED denotes a simulated finalization in a prototype, never a finalized clinical record."
+    },
+    "statusLabel": {
+      "type": "string",
+      "enum": [
+        "DRAFT — HUMAN REVIEW REQUIRED",
+        "APPROVED — SIMULATED FINALIZATION ONLY",
+        "REJECTED — NOT FOR USE",
+        "REVISION REQUESTED — DRAFT WITHDRAWN"
+      ],
+      "description": "Human-visible label rendered with the decision."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "decision": { "const": "approved" } }, "required": ["decision"] },
+      "then": {
+        "properties": {
+          "lifecycleStatus": { "const": "APPROVED-SIMULATED" },
+          "statusLabel": { "const": "APPROVED — SIMULATED FINALIZATION ONLY" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "decision": { "const": "rejected" } }, "required": ["decision"] },
+      "then": {
+        "required": ["decisionReason", "decisionReasonScanned"],
+        "properties": {
+          "lifecycleStatus": { "const": "REJECTED" },
+          "statusLabel": { "const": "REJECTED — NOT FOR USE" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "decision": { "const": "revision-requested" } }, "required": ["decision"] },
+      "then": {
+        "required": ["decisionReason", "decisionReasonScanned"],
+        "properties": {
+          "lifecycleStatus": { "const": "REVISION-REQUESTED" },
+          "statusLabel": { "const": "REVISION REQUESTED — DRAFT WITHDRAWN" }
+        }
+      }
+    },
+    {
+      "if": { "required": ["decisionReason"] },
+      "then": { "required": ["decisionReasonScanned"] }
+    }
+  ]
+}

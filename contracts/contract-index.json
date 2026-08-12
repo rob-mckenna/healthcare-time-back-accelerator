@@ -1,0 +1,212 @@
+{
+  "contractVersion": "1.0.0",
+  "description": "Machine-readable index of the accepted shared contracts, their examples, and the negative fixtures that prove the fail-closed guards. Consumed by scripts/validate-contracts.mjs.",
+  "schemaDir": "contracts/schemas",
+  "exampleDir": "contracts/examples",
+  "contracts": [
+    {
+      "id": "organization-config",
+      "requirementIds": ["REQ-CFG-001", "REQ-CFG-002", "REQ-CFG-003", "REQ-CFG-004"],
+      "schema": "organization-config.schema.json",
+      "example": "../../config/organizations/harborlight/organization.json",
+      "note": "The Harborlight pack is the shipped example configuration and lives under config/. It is validated here so the pack and the contract cannot drift."
+    },
+    {
+      "id": "synthetic-context",
+      "requirementIds": ["REQ-DATA-001", "REQ-DATA-002", "REQ-SAFE-004"],
+      "schema": "synthetic-context.schema.json",
+      "example": "synthetic-context.example.json"
+    },
+    {
+      "id": "synthetic-source-bundle",
+      "requirementIds": ["REQ-DATA-003", "REQ-DATA-004"],
+      "schema": "synthetic-source-bundle.schema.json",
+      "example": "synthetic-source-bundle.example.json"
+    },
+    {
+      "id": "shift-closeout-agent-input",
+      "requirementIds": ["REQ-AGT-001", "REQ-AGT-002", "REQ-SAFE-004"],
+      "schema": "shift-closeout-agent-input.schema.json",
+      "example": "shift-closeout-agent-input.example.json"
+    },
+    {
+      "id": "shift-closeout-agent-output",
+      "requirementIds": ["REQ-AGT-003", "REQ-AGT-004", "REQ-AGT-005", "REQ-SAFE-001", "REQ-SAFE-002"],
+      "schema": "shift-closeout-agent-output.schema.json",
+      "example": "shift-closeout-agent-output.example.json"
+    },
+    {
+      "id": "approval-event",
+      "requirementIds": ["REQ-APPR-001", "REQ-APPR-002", "REQ-APPR-003"],
+      "schema": "approval-event.schema.json",
+      "example": "approval-event.example.json"
+    },
+    {
+      "id": "audit-event",
+      "requirementIds": ["REQ-AUD-001", "REQ-AUD-002", "REQ-AUD-003"],
+      "schema": "audit-event.schema.json",
+      "example": "audit-event.example.json"
+    },
+    {
+      "id": "illustrative-metric",
+      "requirementIds": ["REQ-MET-001", "REQ-MET-002"],
+      "schema": "illustrative-metric.schema.json",
+      "example": "illustrative-metric.example.json"
+    }
+  ],
+  "negativeFixtures": [
+    {
+      "fixture": "invalid/agent-output-missing-draft-status.json",
+      "schema": "shift-closeout-agent-output.schema.json",
+      "reason": "A draft with no mandatory draft status must be refused.",
+      "expect": { "missingProperty": "draftStatus" },
+      "requirementIds": ["REQ-SAFE-001"]
+    },
+    {
+      "fixture": "invalid/agent-output-self-approved-lifecycle.json",
+      "schema": "shift-closeout-agent-output.schema.json",
+      "reason": "An agent can never emit an approved lifecycle state.",
+      "expect": { "instancePath": "/lifecycleStatus" },
+      "requirementIds": ["REQ-APPR-001"]
+    },
+    {
+      "fixture": "invalid/agent-output-safety-flag-false.json",
+      "schema": "shift-closeout-agent-output.schema.json",
+      "reason": "A cleared safety flag must fail closed.",
+      "expect": { "instancePath": "/safetyStatus/noClinicalRecommendation" },
+      "requirementIds": ["REQ-SAFE-002"]
+    },
+    {
+      "fixture": "invalid/agent-output-ungrounded-open-item.json",
+      "schema": "shift-closeout-agent-output.schema.json",
+      "reason": "An open item without a source reference is ungrounded.",
+      "expect": { "instancePath": "/openItems/0/sourceReferences" },
+      "requirementIds": ["REQ-AGT-004"]
+    },
+    {
+      "fixture": "invalid/agent-output-recommendation-section.json",
+      "schema": "shift-closeout-agent-output.schema.json",
+      "reason": "There is no place in the P0 contract to put a clinical recommendation.",
+      "expect": { "additionalProperty": "recommendation" },
+      "requirementIds": ["REQ-SAFE-002"]
+    },
+    {
+      "fixture": "invalid/agent-input-unauthenticated-requester.json",
+      "schema": "shift-closeout-agent-input.schema.json",
+      "reason": "An unauthenticated request cannot be represented.",
+      "expect": { "instancePath": "/requester/authenticated" },
+      "requirementIds": ["REQ-SAFE-003"]
+    },
+    {
+      "fixture": "invalid/agent-input-unapproved-source-bundle.json",
+      "schema": "shift-closeout-agent-input.schema.json",
+      "reason": "An unapproved synthetic bundle cannot be sent for generation.",
+      "expect": { "instancePath": "/sourceBundle/approvedForGeneration" },
+      "requirementIds": ["REQ-DATA-004"]
+    },
+    {
+      "fixture": "invalid/agent-input-missing-context-confirmation.json",
+      "schema": "shift-closeout-agent-input.schema.json",
+      "reason": "Generation without a recorded pre-generation confirmation must fail closed.",
+      "expect": { "missingProperty": "preGenerationConfirmedAt" },
+      "requirementIds": ["REQ-SAFE-004"]
+    },
+    {
+      "fixture": "invalid/synthetic-context-real-identifier.json",
+      "schema": "synthetic-context.schema.json",
+      "reason": "A real-world identifier field cannot be added to synthetic context.",
+      "expect": { "instancePath": "/patient" },
+      "requirementIds": ["REQ-DATA-002"]
+    },
+    {
+      "fixture": "invalid/synthetic-context-unprefixed-patient-id.json",
+      "schema": "synthetic-context.schema.json",
+      "reason": "A patient identifier without the synthetic prefix is structurally invalid.",
+      "expect": { "instancePath": "/patient/syntheticPatientId" },
+      "requirementIds": ["REQ-DATA-002"]
+    },
+    {
+      "fixture": "invalid/approval-event-rejected-without-reason.json",
+      "schema": "approval-event.schema.json",
+      "reason": "A rejection must carry an attributable reason.",
+      "expect": { "missingProperty": "decisionReason" },
+      "requirementIds": ["REQ-APPR-002"]
+    },
+    {
+      "fixture": "invalid/approval-event-missing-reconfirmation.json",
+      "schema": "approval-event.schema.json",
+      "reason": "A decision without a second patient and encounter confirmation must fail closed.",
+      "expect": { "missingProperty": "preApprovalConfirmedAt" },
+      "requirementIds": ["REQ-SAFE-004"]
+    },
+    {
+      "fixture": "invalid/audit-event-carrying-narrative.json",
+      "schema": "audit-event.schema.json",
+      "reason": "Audit evidence must never carry generated narrative.",
+      "expect": { "additionalProperty": "narrative" },
+      "requirementIds": ["REQ-AUD-002"]
+    },
+    {
+      "fixture": "invalid/audit-event-blocked-without-code.json",
+      "schema": "audit-event.schema.json",
+      "reason": "A blocked outcome must name the fail-closed condition.",
+      "expect": { "missingProperty": "failClosedCode" },
+      "requirementIds": ["REQ-AUD-003"]
+    },
+    {
+      "fixture": "invalid/illustrative-metric-mislabeled.json",
+      "schema": "illustrative-metric.schema.json",
+      "reason": "A metric can never claim to be measured.",
+      "expect": { "instancePath": "/metricLabel" },
+      "requirementIds": ["REQ-MET-001"]
+    },
+    {
+      "fixture": "invalid/organization-config-embedded-endpoint.json",
+      "schema": "organization-config.schema.json",
+      "reason": "An environment value cannot be committed in an organization pack; only the variable name is allowed.",
+      "expect": { "instancePath": "/environmentBindings/foundryProjectEndpoint" },
+      "requirementIds": ["REQ-CFG-003"]
+    },
+    {
+      "fixture": "invalid/organization-config-missing-disclaimer.json",
+      "schema": "organization-config.schema.json",
+      "reason": "A configuration cannot silently remove the disclaimer body.",
+      "expect": { "missingProperty": "disclaimerBody" },
+      "requirementIds": ["REQ-SAFE-001"]
+    },
+    {
+      "fixture": "invalid/organization-config-non-synthetic-data.json",
+      "schema": "organization-config.schema.json",
+      "reason": "An organization pack cannot declare a non-synthetic data source.",
+      "expect": { "instancePath": "/data/syntheticOnly" },
+      "requirementIds": ["REQ-DATA-001"]
+    },
+    {
+      "fixture": "invalid/organization-config-illustrative-metrics-unlabelled.json",
+      "schema": "organization-config.schema.json",
+      "reason": "An organization pack cannot describe its time-back figures as measured results; the sample basis note must carry the ILLUSTRATIVE token.",
+      "expect": { "instancePath": "/illustrativeMetrics/sampleBasisNote" },
+      "requirementIds": ["REQ-MET-001", "REQ-CFG-004"]
+    }
+  ],
+  "crossFieldFixtures": [
+    {
+      "fixture": "invalid/illustrative-metric-bad-arithmetic.json",
+      "rule": "metric-arithmetic",
+      "reason": "Schema validation cannot check arithmetic, so the derived time-back figure is checked by rule.",
+      "requirementIds": ["REQ-MET-002"]
+    }
+  ],
+  "crossFieldRules": [
+    { "id": "correlation-propagation", "requirementIds": ["REQ-AUD-001"] },
+    { "id": "scope-echo", "requirementIds": ["REQ-AGT-003"] },
+    { "id": "bundle-binding", "requirementIds": ["REQ-AGT-005"] },
+    { "id": "artifact-binding", "requirementIds": ["REQ-APPR-003"] },
+    { "id": "context-reconfirmation-match", "requirementIds": ["REQ-SAFE-004"] },
+    { "id": "source-reference-resolution", "requirementIds": ["REQ-AGT-004"] },
+    { "id": "metric-arithmetic", "requirementIds": ["REQ-MET-002"] },
+    { "id": "illustrative-metrics-config-arithmetic", "requirementIds": ["REQ-MET-001", "REQ-MET-002"] },
+    { "id": "illustrative-metrics-config-matches-example", "requirementIds": ["REQ-MET-002", "REQ-CFG-002"] },
+    { "id": "organization-config-is-example-only", "requirementIds": ["REQ-CFG-002", "REQ-CFG-003", "REQ-CFG-005"] }
+  ]
+}

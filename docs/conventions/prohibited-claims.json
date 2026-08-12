@@ -1,0 +1,76 @@
+{
+  "description": "Claims that must never appear in generated content, configuration, or documentation for this accelerator. Enforced by scripts/validate-docs.mjs, which skips this file because it necessarily contains the phrases it forbids. Entries are matched case-insensitively as substrings of Markdown prose.",
+  "requirementIds": ["REQ-STORY-003", "REQ-SAFE-006"],
+  "owner": "Switch, enforced by Trinity",
+  "notes": [
+    "Only unambiguous claim phrases belong here. Phrases that a safety statement would legitimately negate are deliberately excluded, because a substring scan cannot read negation.",
+    "Identifier and credential leakage is covered separately by scripts/scan-secrets.mjs."
+  ],
+  "prohibited": [
+    {
+      "phrase": "clinically validated",
+      "reason": "Asserts a regulatory status this prototype does not hold.",
+      "useInstead": "reviewed and approved by a qualified end user in the authorized role"
+    },
+    {
+      "phrase": "HIPAA-compliant",
+      "reason": "Asserts a regulatory status outside P0 scope.",
+      "useInstead": "designed around privacy principles, using synthetic example data only"
+    },
+    {
+      "phrase": "HIPAA compliant",
+      "reason": "Unhyphenated form of the same claim.",
+      "useInstead": "designed around privacy principles, using synthetic example data only"
+    },
+    {
+      "phrase": "production-ready",
+      "reason": "Misrepresents a reusable prototype.",
+      "useInstead": "reusable prototype and solution pattern"
+    },
+    {
+      "phrase": "production ready",
+      "reason": "Unhyphenated form of the same claim.",
+      "useInstead": "reusable prototype and solution pattern"
+    },
+    {
+      "phrase": "proven outcomes",
+      "reason": "Presents simulated figures as measured results.",
+      "useInstead": "illustrative figures from a synthetic example scenario"
+    },
+    {
+      "phrase": "measured savings",
+      "reason": "Presents simulated figures as measured results.",
+      "useInstead": "illustrative time-back figures"
+    },
+    {
+      "phrase": "the AI recommends",
+      "reason": "Implies clinical recommendation authority.",
+      "useInstead": "the draft organises the documented entries"
+    },
+    {
+      "phrase": "the agent recommends",
+      "reason": "Implies clinical recommendation authority.",
+      "useInstead": "the draft organises the documented entries"
+    },
+    {
+      "phrase": "automatically approved",
+      "reason": "Contradicts the human-authority boundary. There is no safe replacement.",
+      "useInstead": "remove entirely; approval is always a recorded human event"
+    },
+    {
+      "phrase": "auto-approve",
+      "reason": "Contradicts the human-authority boundary.",
+      "useInstead": "remove entirely; approval is always a recorded human event"
+    },
+    {
+      "phrase": "replaces the EHR",
+      "reason": "Implies production displacement of a system of record.",
+      "useInstead": "drafts for human review alongside the system of record"
+    },
+    {
+      "phrase": "ready for clinical use",
+      "reason": "Asserts fitness this prototype does not have.",
+      "useInstead": "a demonstration of a bounded solution pattern"
+    }
+  ]
+}

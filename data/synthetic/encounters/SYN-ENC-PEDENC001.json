@@ -1,0 +1,43 @@
+{
+  "_synthetic": true,
+  "_notice": "SYNTHETIC ONLY — not a real encounter record. Created for demonstration purposes. No PHI or PII.",
+  "_datasetVersion": "1.0.0",
+  "resourceType": "Encounter",
+  "id": "SYN-ENC-PEDENC001",
+  "meta": {
+    "versionId": "1.0.0",
+    "profile": [
+      "SYNTHETIC-ONLY — demonstration record"
+    ]
+  },
+  "extension": [
+    {
+      "url": "https://contracts.second-shift-accelerator.example/v1/synthetic-marker",
+      "valueBoolean": true
+    }
+  ],
+  "status": "in-progress",
+  "class": {
+    "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+    "code": "IMP",
+    "display": "inpatient encounter"
+  },
+  "subject": {
+    "reference": "Patient/SYN-PAT-PED0001A"
+  },
+  "period": {
+    "start": "2026-08-11T19:00:00Z"
+  },
+  "reasonCode": [
+    {
+      "text": "Documented synthetic pediatric inpatient admission for shift-closeout demonstration"
+    }
+  ],
+  "participant": [
+    {
+      "individual": {
+        "reference": "Practitioner/SYN-PRAC-RN000001"
+      }
+    }
+  ]
+}

@@ -1,0 +1,157 @@
+{
+  "contractVersion": "1.0.0",
+  "generationId": "GEN-20260812A001",
+  "correlationId": "CORR-20260812-9f2a4c7d1b6e48a0b3c5d7e9f1a2b4c6",
+  "idempotencyKey": "IDK-4c6d8e0f2a4b6c8d0e2f4a6b8c0d2e4f",
+  "generatedAt": "2026-08-12T06:45:41Z",
+  "organizationId": "harborlight",
+  "artifactId": "ART-20260812A001",
+  "artifactVersion": "1.0.0",
+  "artifactSha256": "9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f",
+  "draftStatus": "DRAFT — HUMAN REVIEW REQUIRED",
+  "lifecycleStatus": "DRAFT",
+  "safetyStatus": {
+    "noDiagnosis": true,
+    "noTreatmentOrMedicationRecommendation": true,
+    "noTriage": true,
+    "noClinicalRecommendation": false,
+    "noPatientOrFamilyCommunication": true,
+    "syntheticSourceOnly": true,
+    "groundingComplete": true,
+    "groundingCoverageRatio": 1,
+    "externalRetrievalDisabled": true
+  },
+  "provenance": {
+    "agentInstructionVersion": "1.0.0",
+    "agentInstructionSha256": "f9020da9288314426d3481c281233442e7359a2f893608aa5fb87fc85b401f96",
+    "outputContractVersion": "1.0.0",
+    "modelConfigRef": "shift-closeout-agent-config-v1",
+    "sourceBundleId": "SYN-BDL-PEDBDL01",
+    "sourceBundleSha256": "1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b"
+  },
+  "context": {
+    "syntheticPatientId": "SYN-PAT-PED0001A",
+    "syntheticEncounterId": "SYN-ENC-PEDENC001",
+    "shiftPeriodLabel": "Night shift",
+    "careSettingLabel": "Pediatric inpatient unit"
+  },
+  "requestedScope": [
+    "shiftSummary",
+    "handoffSummary",
+    "openItems",
+    "followUpItems"
+  ],
+  "shiftSummary": {
+    "structureLabel": "SBAR",
+    "narrative": "Documented entries for the night shift period are organised below. The synthetic record shows an in-progress pediatric inpatient encounter beginning 2026-08-11T19:00Z. One documented respiratory rate entry of 22 breaths/min was recorded at 2026-08-11T23:15Z. One care plan entry and one task entry remain documented as in progress.",
+    "sourceReferences": [
+      {
+        "resourceType": "Encounter",
+        "resourceId": "SYN-ENC-PEDENC001",
+        "fieldPath": "/period/start",
+        "fieldLabel": "Encounter period start",
+        "statementExcerpt": "encounter beginning 2026-08-11T19:00Z"
+      },
+      {
+        "resourceType": "Observation",
+        "resourceId": "SYN-OBS-OBS00001",
+        "fieldPath": "/valueQuantity/value",
+        "fieldLabel": "Documented respiratory rate entry",
+        "statementExcerpt": "respiratory rate entry of 22 breaths/min"
+      }
+    ]
+  },
+  "handoffSummary": {
+    "narrative": "Situation and background for the receiving care team, drawn only from documented synthetic entries: encounter remains in progress; one documented observation entry recorded during the period; one open task entry and one care plan follow-up entry are documented as outstanding.",
+    "receivingRoleLabel": "Day shift Registered Nurse",
+    "pendingHumanDecisionNotice": "PENDING HUMAN DECISION — no recommendation is generated",
+    "sourceReferences": [
+      {
+        "resourceType": "Encounter",
+        "resourceId": "SYN-ENC-PEDENC001",
+        "fieldPath": "/status",
+        "fieldLabel": "Encounter status"
+      },
+      {
+        "resourceType": "Task",
+        "resourceId": "SYN-TSK-TSK00001",
+        "fieldPath": "/status",
+        "fieldLabel": "Task status"
+      }
+    ]
+  },
+  "openItems": [
+    {
+      "itemId": "ITM-OPEN01",
+      "description": "Documented open item: education material handout not yet acknowledged.",
+      "sourceResourceType": "Task",
+      "documentedPriorityLabel": "routine",
+      "sourceReferences": [
+        {
+          "resourceType": "Task",
+          "resourceId": "SYN-TSK-TSK00001",
+          "fieldPath": "/description",
+          "fieldLabel": "Task description"
+        }
+      ]
+    }
+  ],
+  "followUpItems": [
+    {
+      "itemId": "ITM-FUP001",
+      "description": "Documented follow-up entry for next shift period.",
+      "documentedAssignedRoleLabel": "Day shift Registered Nurse",
+      "sourceReferences": [
+        {
+          "resourceType": "CarePlan",
+          "resourceId": "SYN-CPL-CPL00001",
+          "fieldPath": "/activity/0/detail/description",
+          "fieldLabel": "Care plan activity description"
+        }
+      ]
+    }
+  ],
+  "sourceReferences": [
+    {
+      "resourceType": "Encounter",
+      "resourceId": "SYN-ENC-PEDENC001",
+      "fieldPath": "/period/start",
+      "fieldLabel": "Encounter period start"
+    },
+    {
+      "resourceType": "Encounter",
+      "resourceId": "SYN-ENC-PEDENC001",
+      "fieldPath": "/status",
+      "fieldLabel": "Encounter status"
+    },
+    {
+      "resourceType": "Observation",
+      "resourceId": "SYN-OBS-OBS00001",
+      "fieldPath": "/valueQuantity/value",
+      "fieldLabel": "Documented respiratory rate entry"
+    },
+    {
+      "resourceType": "Task",
+      "resourceId": "SYN-TSK-TSK00001",
+      "fieldPath": "/status",
+      "fieldLabel": "Task status"
+    },
+    {
+      "resourceType": "Task",
+      "resourceId": "SYN-TSK-TSK00001",
+      "fieldPath": "/description",
+      "fieldLabel": "Task description"
+    },
+    {
+      "resourceType": "CarePlan",
+      "resourceId": "SYN-CPL-CPL00001",
+      "fieldPath": "/activity/0/detail/description",
+      "fieldLabel": "Care plan activity description"
+    }
+  ],
+  "disclaimer": {
+    "mandatoryPrefix": "DRAFT — HUMAN REVIEW REQUIRED",
+    "body": "This content was generated from synthetic example data by an assistive drafting agent. It has no clinical or legal standing and must be reviewed by a qualified Registered Nurse before use.",
+    "syntheticDataNotice": "All patient and encounter data shown here is synthetic and was created for demonstration purposes."
+  }
+}

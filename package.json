@@ -1,0 +1,29 @@
+{
+  "name": "second-shift-reduction-accelerator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Second Shift Reduction Accelerator — Option A prototype: contracts, governance, orchestration, and a locally runnable synthetic shift-closeout vertical slice. Synthetic data only; drafts require human approval.",
+  "license": "SEE LICENSE IN SQUAD_BOOTSTRAP.md",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "validate:contracts": "node scripts/validate-contracts.mjs",
+    "validate:docs": "node scripts/validate-docs.mjs",
+    "scan:secrets": "node scripts/scan-secrets.mjs",
+    "validate": "npm run validate:contracts && npm run validate:docs && npm run scan:secrets",
+    "test:unit": "node --test \"tests/**/*.test.mjs\"",
+    "test:fail-closed": "node src/orchestration/test/run-fail-closed-catalog.mjs",
+    "test:governance": "node src/governance/test/run-governance-checks.mjs",
+    "evaluate:digest": "node agent/evaluation/check-instruction-digest.mjs",
+    "evaluate:grounding": "node agent/evaluation/run-grounding-evaluation.mjs",
+    "demo": "node scripts/run-local-journey.mjs",
+    "verify": "npm run validate && npm run test:fail-closed && npm run test:governance && npm run evaluate:digest && npm run evaluate:grounding && npm run test:unit && npm run demo",
+    "test": "npm run verify"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

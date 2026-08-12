@@ -1,0 +1,75 @@
+{
+  "contractVersion": "1.0.0",
+  "organizationId": "harborlight",
+  "organizationName": "Harborlight Children's Hospital",
+  "solution": {
+    "solutionName": "Second Shift Reduction Accelerator",
+    "primaryWorkflow": "shift-closeout",
+    "pilotLabel": "Harborlight Time-Back Pilot"
+  },
+  "personas": {
+    "primaryPersonaName": "Maria Delgado",
+    "primaryPersonaRole": "Chief Nursing Officer",
+    "endUserRole": "Registered Nurse",
+    "endUserRolePlural": "Registered Nurses",
+    "careTeamNoun": "care team",
+    "authorizedRoleCodes": [
+      "registered-nurse",
+      "charge-nurse"
+    ]
+  },
+  "careContext": {
+    "careSetting": "Pediatric inpatient unit",
+    "pilotUnit": "Synthetic pediatric pilot unit",
+    "unitNoun": "unit",
+    "ehrSystemLabel": "Synthetic FHIR simulator"
+  },
+  "terminology": {
+    "terminologyPack": "harborlight-pediatrics",
+    "locale": "en-US",
+    "shiftLabel": "Shift closeout",
+    "handoffFormatLabel": "SBAR",
+    "sourceReferenceLabel": "Source references",
+    "approvalActionLabel": "Approve",
+    "timeBackMetricLabel": "Time returned to care"
+  },
+  "brand": {
+    "brandName": "Harborlight Time Back to Care",
+    "brandAssetPath": "config/organizations/harborlight/brand"
+  },
+  "data": {
+    "syntheticOnly": true,
+    "fhirDataPath": "data/synthetic-fhir",
+    "syntheticDatasetVersion": "1.0.0"
+  },
+  "operations": {
+    "maxRevisions": 3,
+    "agentTimeoutMs": 60000,
+    "inputContractVersion": "1.0.0",
+    "outputContractVersion": "1.0.0",
+    "groundingThreshold": 1,
+    "auditRetentionLabel": "Demonstration session only. No long-term record keeping in this prototype."
+  },
+  "safetyCopy": {
+    "mandatoryDraftPrefix": "DRAFT — HUMAN REVIEW REQUIRED",
+    "disclaimerBody": "This content was generated from synthetic example data by an assistive drafting agent. It has no clinical or legal standing and must be reviewed by a qualified Registered Nurse before use.",
+    "syntheticDataNotice": "All patient and encounter data shown here is synthetic and was created for demonstration purposes.",
+    "errorMessageOverrides": {
+      "E-IDENTITY-MISSING": "We could not verify your identity for this workflow. Please sign out, sign back in, and try again."
+    }
+  },
+  "illustrativeMetrics": {
+    "metricLabel": "ILLUSTRATIVE",
+    "baselineDurationMinutes": 24,
+    "assistedDurationMinutes": 9,
+    "sampleBasisNote": "Measured Harborlight time savings observed across the pediatric pilot unit during week one."
+  },
+  "environmentBindings": {
+    "azureRegion": "AZURE_REGION",
+    "foundryProjectEndpoint": "FOUNDRY_PROJECT_ENDPOINT",
+    "foundryAgentId": "FOUNDRY_AGENT_ID",
+    "copilotEnvironmentId": "COPILOT_ENVIRONMENT_ID",
+    "auditEventSink": "AUDIT_EVENT_SINK",
+    "approvalEventSink": "APPROVAL_EVENT_SINK"
+  }
+}
