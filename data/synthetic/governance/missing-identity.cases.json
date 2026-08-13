@@ -1,0 +1,34 @@
+{
+  "$comment": "Synthetic fixture. Negative cases for missing/malformed identity, consumed by tests/integration/missing-identity.test.mjs.",
+  "synthetic": true,
+  "cases": [
+    {
+      "name": "requester absent",
+      "requester": null
+    },
+    {
+      "name": "requester unauthenticated",
+      "requester": { "actorRef": "USR-RN0000000001", "roleCode": "registered-nurse", "authenticated": false }
+    },
+    {
+      "name": "actorRef missing",
+      "requester": { "roleCode": "registered-nurse", "authenticated": true }
+    },
+    {
+      "name": "actorRef malformed prefix",
+      "requester": { "actorRef": "XYZ-RN0000000001", "roleCode": "registered-nurse", "authenticated": true }
+    },
+    {
+      "name": "actorRef too short",
+      "requester": { "actorRef": "USR-RN01", "roleCode": "registered-nurse", "authenticated": true }
+    },
+    {
+      "name": "actorRef contains lowercase",
+      "requester": { "actorRef": "USR-rn0000000001", "roleCode": "registered-nurse", "authenticated": true }
+    },
+    {
+      "name": "roleCode missing",
+      "requester": { "actorRef": "USR-RN0000000001", "authenticated": true }
+    }
+  ]
+}

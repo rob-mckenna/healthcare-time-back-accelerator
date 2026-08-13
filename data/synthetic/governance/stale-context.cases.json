@@ -1,0 +1,89 @@
+{
+  "$comment": "Synthetic fixture. Negative cases for stale context and wrong-confirmer handoffs, consumed by tests/integration/stale-context.test.mjs. Baseline requester/context/approver values mirror connected-agent-handoff.valid.json and connected-agent-approval-handoff.valid.json.",
+  "synthetic": true,
+  "preGenerationCases": [
+    {
+      "name": "pre-generation confirmation older than the default 15-minute maximum",
+      "requester": { "actorRef": "USR-RN0000000001", "roleCode": "registered-nurse", "authenticated": true },
+      "context": {
+        "syntheticPatientId": "SYN-PAT-PED0001A",
+        "syntheticEncounterId": "SYN-ENC-PEDENC001",
+        "preGenerationConfirmedAt": "2026-08-13T06:00:00Z",
+        "confirmedByRef": "USR-RN0000000001"
+      },
+      "nowIso": "2026-08-13T06:30:01Z"
+    },
+    {
+      "name": "pre-generation confirmation timestamped in the future",
+      "requester": { "actorRef": "USR-RN0000000001", "roleCode": "registered-nurse", "authenticated": true },
+      "context": {
+        "syntheticPatientId": "SYN-PAT-PED0001A",
+        "syntheticEncounterId": "SYN-ENC-PEDENC001",
+        "preGenerationConfirmedAt": "2026-08-13T07:00:00Z",
+        "confirmedByRef": "USR-RN0000000001"
+      },
+      "nowIso": "2026-08-13T06:45:00Z"
+    },
+    {
+      "name": "confirmedByRef does not match requester.actorRef (wrong confirmer)",
+      "requester": { "actorRef": "USR-RN0000000001", "roleCode": "registered-nurse", "authenticated": true },
+      "context": {
+        "syntheticPatientId": "SYN-PAT-PED0001A",
+        "syntheticEncounterId": "SYN-ENC-PEDENC001",
+        "preGenerationConfirmedAt": "2026-08-13T06:45:00Z",
+        "confirmedByRef": "USR-RN0000000099"
+      },
+      "nowIso": "2026-08-13T06:46:00Z"
+    }
+  ],
+  "preApprovalCases": [
+    {
+      "name": "pre-approval reconfirmation older than the default 15-minute maximum",
+      "approver": { "actorRef": "USR-RN0000000001", "roleCode": "registered-nurse", "authenticated": true },
+      "originalContext": { "syntheticPatientId": "SYN-PAT-PED0001A", "syntheticEncounterId": "SYN-ENC-PEDENC001" },
+      "reconfirmedContext": {
+        "syntheticPatientId": "SYN-PAT-PED0001A",
+        "syntheticEncounterId": "SYN-ENC-PEDENC001",
+        "preApprovalConfirmedAt": "2026-08-13T06:00:00Z"
+      },
+      "reconfirmedByRef": "USR-RN0000000001",
+      "nowIso": "2026-08-13T06:30:01Z"
+    },
+    {
+      "name": "reconfirmedByRef does not match approver.actorRef (wrong confirmer at approval)",
+      "approver": { "actorRef": "USR-RN0000000001", "roleCode": "registered-nurse", "authenticated": true },
+      "originalContext": { "syntheticPatientId": "SYN-PAT-PED0001A", "syntheticEncounterId": "SYN-ENC-PEDENC001" },
+      "reconfirmedContext": {
+        "syntheticPatientId": "SYN-PAT-PED0001A",
+        "syntheticEncounterId": "SYN-ENC-PEDENC001",
+        "preApprovalConfirmedAt": "2026-08-13T06:52:00Z"
+      },
+      "reconfirmedByRef": "USR-CN0000000099",
+      "nowIso": "2026-08-13T06:53:00Z"
+    },
+    {
+      "name": "reconfirmed patient differs from original request context (approval bypass attempt)",
+      "approver": { "actorRef": "USR-RN0000000001", "roleCode": "registered-nurse", "authenticated": true },
+      "originalContext": { "syntheticPatientId": "SYN-PAT-PED0001A", "syntheticEncounterId": "SYN-ENC-PEDENC001" },
+      "reconfirmedContext": {
+        "syntheticPatientId": "SYN-PAT-WRONGPAT1",
+        "syntheticEncounterId": "SYN-ENC-PEDENC001",
+        "preApprovalConfirmedAt": "2026-08-13T06:52:00Z"
+      },
+      "reconfirmedByRef": "USR-RN0000000001",
+      "nowIso": "2026-08-13T06:53:00Z"
+    },
+    {
+      "name": "reconfirmed encounter differs from original request context (approval bypass attempt)",
+      "approver": { "actorRef": "USR-RN0000000001", "roleCode": "registered-nurse", "authenticated": true },
+      "originalContext": { "syntheticPatientId": "SYN-PAT-PED0001A", "syntheticEncounterId": "SYN-ENC-PEDENC001" },
+      "reconfirmedContext": {
+        "syntheticPatientId": "SYN-PAT-PED0001A",
+        "syntheticEncounterId": "SYN-ENC-WRONGENC1",
+        "preApprovalConfirmedAt": "2026-08-13T06:52:00Z"
+      },
+      "reconfirmedByRef": "USR-RN0000000001",
+      "nowIso": "2026-08-13T06:53:00Z"
+    }
+  ]
+}

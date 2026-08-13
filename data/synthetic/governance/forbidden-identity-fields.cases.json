@@ -1,0 +1,60 @@
+{
+  "$comment": "Synthetic fixture. Handoff payloads carrying disallowed identity-bearing fields at various nesting depths, consumed by tests/security/audit-minimality.test.mjs and tests/integration/missing-identity.test.mjs.",
+  "synthetic": true,
+  "cases": [
+    {
+      "name": "requester carries a display name alongside a valid actorRef",
+      "handoff": {
+        "requester": {
+          "actorRef": "USR-RN0000000001",
+          "roleCode": "registered-nurse",
+          "authenticated": true,
+          "displayName": "Sample Nurse Testcase"
+        }
+      }
+    },
+    {
+      "name": "requester carries an email address",
+      "handoff": {
+        "requester": {
+          "actorRef": "USR-RN0000000001",
+          "roleCode": "registered-nurse",
+          "authenticated": true,
+          "email": "nurse.testcase@hospital.example"
+        }
+      }
+    },
+    {
+      "name": "requester carries a bearer token",
+      "handoff": {
+        "requester": {
+          "actorRef": "USR-RN0000000001",
+          "roleCode": "registered-nurse",
+          "authenticated": true,
+          "accessToken": "PLACEHOLDER-NOT-A-REAL-TOKEN"
+        }
+      }
+    },
+    {
+      "name": "context carries a nested userPrincipalName under an unexpected wrapper",
+      "handoff": {
+        "context": {
+          "syntheticPatientId": "SYN-PAT-PED0001A",
+          "syntheticEncounterId": "SYN-ENC-PEDENC001",
+          "directoryClaims": {
+            "userPrincipalName": "n.testcase@hospital.example"
+          }
+        }
+      }
+    },
+    {
+      "name": "array of claims carries a tenantId",
+      "handoff": {
+        "claims": [
+          { "type": "role", "value": "registered-nurse" },
+          { "type": "tid", "tenantId": "00000000-0000-0000-0000-000000000000" }
+        ]
+      }
+    }
+  ]
+}

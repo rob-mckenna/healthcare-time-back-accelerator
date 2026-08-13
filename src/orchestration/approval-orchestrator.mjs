@@ -29,8 +29,8 @@ import { createHash, randomBytes } from 'node:crypto';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { failClosed } from './fail-closed.mjs';
-import { assertPreApprovalConfirmed } from './context-guard.mjs';
 import { scanText } from '../governance/phi-scan.mjs';
+import { assertPreApprovalHandoff } from '../governance/assert-authorized-requester.mjs';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const REPO_ROOT = join(__dirname, '..', '..');
@@ -97,6 +97,7 @@ export function computeArtifactSha256(artifact) {
  * @param {object} params.approver — { actorRef, roleCode, authenticated }
  * @param {object} params.artifact — agent output (for SHA-256 binding)
  * @param {object} params.reconfirmedContext — pre-approval reconfirmation
+ * @param {string} params.reconfirmedByRef — human actor who performed the reconfirmation
  * @param {object} params.originalContext — pre-generation context (for match check)
  * @param {'approved'|'rejected'|'revision-requested'} params.decision
  * @param {string} [params.decisionReason] — required for rejected / revision-requested
@@ -108,10 +109,16 @@ export function computeArtifactSha256(artifact) {
 export async function recordDecision(params) {
   const {
     correlationId, organizationId, approver, artifact,
-    reconfirmedContext, originalContext,
+    reconfirmedContext, reconfirmedByRef, originalContext,
     decision, decisionReason, revisionNumber = 0,
     orgConfig,
   } = params;
+
+  // Pre-approval context reconfirmation (REQ-APPR-003, REQ-SAFE-004)
+  const handoff = assertPreApprovalHandoff({
+    approver, reconfirmedContext, reconfirmedByRef, originalContext, orgConfig,
+  });
+  if (!handoff.ok) throw failClosed(handoff.failClosedCode, handoff.error);
 
   // Revision limit check (REQ-WF-006)
   if (decision === 'revision-requested') {
@@ -123,9 +130,6 @@ export async function recordDecision(params) {
       );
     }
   }
-
-  // Pre-approval context reconfirmation (REQ-APPR-003, REQ-SAFE-004)
-  assertPreApprovalConfirmed(reconfirmedContext, originalContext);
 
   // Decision reason required for non-approval decisions
   if ((decision === 'rejected' || decision === 'revision-requested') &&

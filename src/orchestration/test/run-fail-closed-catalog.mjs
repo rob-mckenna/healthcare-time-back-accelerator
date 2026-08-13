@@ -291,7 +291,7 @@ async function testApprovalWithoutConfirmation() {
       {
         syntheticPatientId: 'SYN-PAT-DIFFERENT1',
         syntheticEncounterId: 'SYN-ENC-PEDENC001',
-        preApprovalConfirmedAt: '2026-08-12T06:52:44Z',
+        preApprovalConfirmedAt: new Date().toISOString(),
       },
       originalCtx
     )
@@ -319,7 +319,7 @@ async function testRevisionLimitReached() {
   const reconfirmedContext = {
     syntheticPatientId: exampleOutput.context.syntheticPatientId,
     syntheticEncounterId: exampleOutput.context.syntheticEncounterId,
-    preApprovalConfirmedAt: '2026-08-12T06:52:44Z',
+    preApprovalConfirmedAt: new Date().toISOString(),
     sourceBundleId: 'SYN-BDL-PEDBDL01',
     sourceBundleSha256: '1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b',
   };
@@ -339,6 +339,7 @@ async function testRevisionLimitReached() {
       approver,
       artifact: exampleOutput,
       reconfirmedContext,
+      reconfirmedByRef: approver.actorRef,
       originalContext,
       decision: 'revision-requested',
       decisionReason: 'Need more detail on the open items.',

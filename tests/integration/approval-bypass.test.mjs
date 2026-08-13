@@ -137,10 +137,18 @@ test('approver block contains only actorRef, roleCode, authenticated', () => {
   assert.deepEqual(approverKeys.sort(), ['actorRef', 'authenticated', 'roleCode'].sort());
 });
 
-test('actorRef follows opaque USR-/AGT-/SYS- pattern', () => {
+test('actorRef follows the opaque human USR- pattern', () => {
   const r = createApprovalEvent(BASE);
   assert.ok(r.event);
-  assert.match(r.event.approver.actorRef, /^(USR|AGT|SYS)-[A-Z0-9]{8,24}$/);
+  assert.match(r.event.approver.actorRef, /^USR-[A-Z0-9]{8,24}$/);
+});
+
+test('agent and system identities cannot create approval events', () => {
+  for (const actorRef of ['AGT-FOUNDRYAGENT0001', 'SYS-WORKFLOW0000001']) {
+    const r = createApprovalEvent({ ...BASE, actorRef });
+    assert.equal(r.event, undefined);
+    assert.equal(r.failClosedCode, 'E-IDENTITY-MISSING');
+  }
 });
 
 // ============================================================================

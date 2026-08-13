@@ -1,0 +1,26 @@
+{
+  "$comment": "Synthetic fixture. Negative cases for unauthorized/unrecognised role codes, consumed by tests/integration/unauthorized-role.test.mjs. authorizedRoleCodes for the harborlight example organization are [registered-nurse, charge-nurse] (config/organizations/harborlight/organization.json).",
+  "synthetic": true,
+  "cases": [
+    {
+      "name": "administrator is a recognised role but not authorized for harborlight",
+      "requester": { "actorRef": "USR-ADM000000001X", "roleCode": "administrator", "authenticated": true }
+    },
+    {
+      "name": "demo-observer is a recognised role but not authorized for harborlight",
+      "requester": { "actorRef": "USR-OBS000000001X", "roleCode": "demo-observer", "authenticated": true }
+    },
+    {
+      "name": "clinical-supervisor is a recognised role but not authorized for harborlight",
+      "requester": { "actorRef": "USR-SUP000000001X", "roleCode": "clinical-supervisor", "authenticated": true }
+    },
+    {
+      "name": "roleCode is not in the shared contract vocabulary at all",
+      "requester": { "actorRef": "USR-XX0000000001X", "roleCode": "front-desk-clerk", "authenticated": true }
+    },
+    {
+      "name": "roleCode is empty string",
+      "requester": { "actorRef": "USR-XX0000000001X", "roleCode": "", "authenticated": true }
+    }
+  ]
+}
