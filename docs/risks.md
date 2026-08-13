@@ -6,7 +6,7 @@ and Morpheus, consolidated under a single identifier scheme.
 Severity is the impact if the risk is realised during a P0 demonstration or
 review. `Blocker` means work stops for the affected scope until a human decides.
 
-## Open blockers requiring a human decision
+## Blocker register
 
 These are the items where the accepted baseline cannot proceed to a working
 implementation without a decision or a verification that Trinity cannot make.
@@ -34,45 +34,41 @@ the decision and removes Power Automate from the target invocation path.
 the connected Foundry agent. It does not establish this accelerator's structured
 request/response adaptation, timeout semantics, error taxonomy, or end-user
 identity propagation. Direct connected-agent validation is therefore
-**NOT RUN** and tracked as RISK-020; BLOCKER-002 remains separate.
+**NOT RUN** and tracked as RISK-020. BLOCKER-002's repository controls are
+resolved separately; live identity and role propagation remain inside the
+RISK-020 connected-tenant validation boundary.
 
 **Official source.**
 [Connect to a Microsoft Foundry agent (preview)](https://learn.microsoft.com/en-us/microsoft-copilot-studio/add-agent-foundry-agent),
 reviewed 2026-08-13.
 
-### BLOCKER-002 — Role claims as Copilot Studio topic variables are unverified
+### BLOCKER-002 — Repository identity and authorization controls
 
 | | |
 |---|---|
 | Raised by | Tank |
 | Severity | Blocker |
 | Affects | REQ-WF-001, REQ-APPR-001, REQ-APPR-002, work package WP-04 |
-| Blocks | Authorization enforcement in the experience layer. |
+| Blocks | **RESOLVED for repository controls.** Connected-tenant identity and role handoff validation remains NOT RUN under RISK-020. |
+| Status (2026-08-13) | **RESOLVED.** Repository identity, authorization, context freshness, approval authority, and audit-minimality controls are implemented and exercised. |
 
-**Evidence.** `REQ-WF-001` requires an authenticated user in an authorized role,
-and the approval gate requires `roleCode` checked against
-`personas.authorizedRoleCodes`. Whether directory role claims are available to a
-Copilot Studio topic in the target tenant, and in what shape, is not verified.
-Without it, the experience layer can authenticate but cannot authorize, and the
-approval gate degrades to "any signed-in user".
+**Repository evidence.** `src/governance/assert-authorized-requester.mjs`
+enforces authenticated opaque human actors, organization-authorized roles,
+forbidden identity-field rejection, fresh patient/encounter confirmation, and
+same-actor confirmation at generation and approval. The running orchestration
+invokes these gates before generation and before any decision is recorded.
+Approval and audit paths independently reject agent/system approvers and redact
+identity-bearing or token-like fields. The contract and evidence boundary is
+documented in `docs/governance/identity-handoff-contract.md` and exercised by
+the connected-agent orchestration, missing-identity, unauthorized-role,
+stale-context, approval-bypass, and audit-minimality tests.
 
-**Safe options.**
-
-1. Verify claim availability in the target tenant and bind `roleCode` from the
-   claim.
-2. Resolve the role through a supported directory lookup or Copilot Studio
-   action, keyed by the signed-in user, before the direct connected-agent call.
-3. Use a synthetic role fixture for P0, clearly labelled, with the authorization
-   check implemented and exercised against the fixture.
-
-**Recommendation.** Verify a supported claim or directory-lookup source in the
-target tenant. A labelled synthetic role fixture is acceptable only if the
-demonstration states that the role is a fixture and the authorization code path
-is real.
-
-**Exact human decision required.** "Confirm whether directory role claims can be
-made available to the Copilot Studio topic in the target tenant. If not, approve
-a supported directory lookup or a labelled synthetic role fixture for P0."
+**Resolution boundary.** This evidence validates the repository's behavior
+when it receives an identity handoff envelope. It does not prove that a live
+Copilot Studio connected-agent configuration in the target tenant can source,
+shape, and transmit that envelope. No live tenant identity propagation or role
+mapping is claimed. That connected-system validation remains **NOT RUN** under
+RISK-020 and must fail closed if the repository envelope cannot be preserved.
 
 ### BLOCKER-003 — Foundry external retrieval default must be verified and disabled
 
@@ -213,7 +209,7 @@ section 9 onward will be completed."
 | RISK-017 | The simulated generation boundary is mistaken for the separately validated live Foundry agent or a live Copilot Studio connection | Trinity | High | REQ-SAFE-006, REQ-SCOPE-002 | `src/orchestration/foundry-adapter.mjs` exports `IS_SIMULATION_BOUNDARY` and a label naming RISK-020; the local journey separately records issue #6 live-agent evidence and direct connected-agent `NOT RUN` status; integration tests assert both | Mitigated at the artifact level; the spoken demonstration must still state it, per `docs/demo/talk-track.md` |
 | RISK-018 | A narrow secret-scan carve-out is widened until a committed credential passes | Trinity | Medium | REQ-VAL-003 | The carve-out applies to one rule only, fires only when the matched value contains a template interpolation, and leaves literal-value detection unchanged; `tests/security/secret-exposure.test.mjs` asserts twelve credential-shaped and identifier-shaped values still fire and that a literal key on a line that also contains an interpolation is still caught | Mitigated — 10 of 10 secret-exposure tests pass and `npm run scan:secrets` reports zero findings across 120 files |
 | RISK-019 | The isolated P0 Foundry deployment's minimal capacity (`GlobalStandard`, capacity 1, ≈1,000 tokens/60s) cannot admit a single agent-mediated call once the ~4,000-token versioned instructions are included, so live evaluation cannot run at this capacity regardless of retry cadence | Neo | High | REQ-AGT-004, work package WP-05 | Root-caused via a direct (non-agent) diagnostic call that succeeded trivially, isolating the failure to the agent-mediated code path; see `docs/evidence/2026-08-13-foundry-agent-provisioning.md` | Resolved — capacity raised to 10 under explicit human authorization; verified via `az` at `request: 10/60s`, `token: 10000/60s`; all 7 bounded live evaluation cases then ran and passed, see `docs/evidence/2026-08-13-foundry-live-evaluation.md` |
-| RISK-020 | The preview direct connected-agent path may not preserve the repository's structured request/response contract or expected interactive behavior in the target Copilot Studio tenant | Trinity | High | REQ-SCOPE-001, REQ-WF-003, REQ-SAFE-005, WP-04 | Keep the local simulation boundary; author and test explicit request/response adaptation; run deterministic validation before rendering; fail closed if the contract cannot be preserved | Open — direct connected-agent validation **NOT RUN**. Issue #6 evidence covers the Foundry agent, not the Copilot Studio connection |
+| RISK-020 | The preview direct connected-agent path may not preserve the repository's structured request/response contract, identity/role handoff envelope, or expected interactive behavior in the target Copilot Studio tenant | Trinity | High | REQ-SCOPE-001, REQ-WF-001, REQ-WF-003, REQ-SAFE-005, WP-04 | Keep the local simulation boundary; author and test explicit request/response and identity adaptation; run deterministic validation before rendering or approval; fail closed if the contracts cannot be preserved | Open — connected-tenant validation **NOT RUN**. Repository controls resolve BLOCKER-002 locally, and issue #6 evidence covers the Foundry agent, but neither proves the live Copilot Studio connection |
 
 ## Review
 
@@ -245,5 +241,13 @@ Updated again 2026-08-13 for issue #4: ADR-20260813-011 resolves BLOCKER-001's
 path-selection decision with the documented direct Microsoft Foundry
 connected-agent path. Power Automate is not the target intermediary. RISK-020
 records the remaining live Copilot Studio validation gap. Direct
-connected-agent validation is **NOT RUN**; BLOCKER-002 and BLOCKER-004 remain
-open, and no user identity propagation is claimed.
+connected-agent validation is **NOT RUN**; BLOCKER-004 remains open, and no
+live user identity propagation is claimed.
+
+Updated again 2026-08-13 for issue #5 / merged PR #8: BLOCKER-002 is
+**resolved for repository identity and authorization controls**. The repository
+now enforces the explicit identity handoff, authorized roles, fresh same-actor
+context confirmation, human-only approval, and audit redaction with executable
+tests. Connected-tenant identity/role sourcing and propagation remain **NOT
+RUN** under RISK-020; repository validation is not live connected-system
+validation.

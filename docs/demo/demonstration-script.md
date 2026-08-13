@@ -326,7 +326,7 @@ implemented**. They must not be implied as operational in any demonstration.
 | Capability | Status |
 |---|---|
 | Live EHR or FHIR API integration | `FUTURE` — not implemented |
-| Production identity and role-claim enforcement | `FUTURE` — not implemented; BLOCKER-002 is open |
+| Production identity and role-claim enforcement | `FUTURE` — repository controls implemented; connected-tenant validation NOT RUN under RISK-020 |
 | Write-back to any system of record | `FUTURE` — not implemented |
 | Real patient data or PHI | Permanently out of scope for this prototype |
 | Family or patient communication | Permanently out of scope |
@@ -339,8 +339,10 @@ implemented**. They must not be implied as operational in any demonstration.
 
 The direct experience-to-agent path is selected by ADR-20260813-011, but direct
 connected-agent validation is **NOT RUN** under RISK-020. Role-claim
-authorization remains open under BLOCKER-002. The demonstration must state
-these explicitly whenever a live binding is discussed.
+authorization and identity-handoff controls are implemented and tested in the
+repository, resolving BLOCKER-002 locally, but live tenant propagation is not
+validated. The demonstration must distinguish these evidence boundaries
+whenever a live binding is discussed.
 
 ---
 

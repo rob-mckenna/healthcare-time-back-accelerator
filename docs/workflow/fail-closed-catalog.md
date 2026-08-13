@@ -34,7 +34,7 @@ Rules that apply to every code (from `docs/conventions/draft-and-safety-status.m
 | User message source | `safetyCopy.errorMessageOverrides["E-IDENTITY-MISSING"]` |
 | Harborlight message | "We could not verify your identity for this workflow. Please sign out, sign back in, and try again." |
 | Test coverage | `run-fail-closed-catalog.mjs` — unauthenticated, missing actorRef, unauthorized role |
-| BLOCKER | BLOCKER-002 affects live role claim resolution (see `docs/risks.md`) |
+| Evidence boundary | BLOCKER-002 repository authorization controls are resolved; live connected-tenant role sourcing remains NOT RUN under RISK-020 (see `docs/risks.md`) |
 
 ---
 

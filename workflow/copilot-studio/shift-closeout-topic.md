@@ -16,11 +16,13 @@
 > `docs/workflow/copilot-studio-foundry-direct-connection.md` for the full
 > specification, official citation, adaptation boundary, and exception paths.
 >
-> **BLOCKER-002** (role claim availability unverified) remains open and is tracked by
-> issue #5. The Microsoft Foundry connector documentation does not describe end-user
-> Entra identity or role-claim propagation of any kind — this topic never assumes the
-> Foundry connection supplies identity or authorization. Every invocation is gated by
-> the explicit, validated requester context this topic builds independently (Step 1).
+> **BLOCKER-002 is resolved for repository controls** by issue #5 / PR #8.
+> Explicit requester, authorized-role, context-freshness, same-confirmer,
+> human-approval, and audit-redaction gates are implemented and tested. The
+> Microsoft Foundry connector documentation does not describe end-user Entra
+> identity or role-claim propagation, so this topic never assumes the connection
+> supplies them. Live connected-tenant identity and role handoff remains **NOT
+> RUN** under RISK-020.
 >
 > Issue #6 is resolved and supplies the new-portal Foundry agent. Direct
 > Copilot Studio connected-agent validation is still **NOT RUN**: no Copilot
@@ -38,7 +40,7 @@
 | Entry point | User intent: "I need to close out my shift" |
 | Conversation surface | Copilot Studio (Microsoft 365 Copilot embedded experience or standalone agent) |
 | Authentication | System-topic `AuthenticateUser` required before any node in this topic |
-| Authorization | `roleCode` must be in `personas.authorizedRoleCodes`; resolved and enforced entirely inside this topic — see BLOCKER-002 / issue #5. Never assumed from the Foundry connection. |
+| Authorization | `roleCode` must be in `personas.authorizedRoleCodes`; the repository gate is implemented and tested under BLOCKER-002 / issue #5. The live role source is never assumed from the Foundry connection and remains NOT RUN in a connected tenant under RISK-020. |
 | Agent invocation | Connected agent via **Agents → Add an agent → Connect to an external agent → Microsoft Foundry** (preview, standard harness). One Copilot Studio agent, one connected Foundry agent. See `docs/workflow/copilot-studio-foundry-direct-connection.md`. |
 | Draft label | `DRAFT — HUMAN REVIEW REQUIRED` on every surface that renders the artifact |
 
@@ -54,11 +56,12 @@ acceptance criteria (`docs/plan/p0-execution-plan.md`).
 1. Call `System.AuthenticateUser` to obtain an authenticated session.
 2. If authentication fails: surface `errorMessageOverrides["E-IDENTITY-MISSING"]`
    from the configuration pack. End the topic.
-3. Resolve the user's `roleCode` — see BLOCKER-002 / issue #5 for the pending
-   resolution path. The Foundry connected-agent documentation does not describe
-   any mechanism for propagating end-user identity or role claims, so this
-   resolution happens entirely inside the topic (or a system it calls directly),
-   never inside or via the connected-agent action node in Step 3.
+3. Resolve the user's `roleCode` into the repository-validated identity handoff
+   envelope defined by issue #5. The Foundry connected-agent documentation does
+   not describe end-user identity or role propagation, so the live role source
+   must be configured and validated in the topic (or a system it calls directly),
+   never assumed from the connected-agent action node in Step 3. That target-
+   tenant validation remains NOT RUN under RISK-020.
 4. If `roleCode` is absent or not in `personas.authorizedRoleCodes`: surface
    `errorMessageOverrides["E-IDENTITY-MISSING"]`. End the topic.
 5. Build `actorRef` as `USR-{opaque-reference}` — never include a display name,
@@ -215,13 +218,13 @@ If any of these elements cannot be rendered, the surface must not render the dra
 | Sub-task | Blocker | Status |
 |---|---|---|
 | Copilot Studio-to-Foundry invocation model decision | BLOCKER-001 | **Resolved** (issue #4, ADR-20260813-011) — direct Foundry connected-agent path. Issue #6 supplied and validated the Foundry agent; direct Copilot Studio binding and contract adaptation remain **NOT RUN** under RISK-020. |
-| Role claim resolution from directory | BLOCKER-002 | Blocked — pending human decision, tracked by issue #5. Not satisfied by the Foundry connection; resolved entirely inside the topic. |
+| Repository identity and role authorization controls | BLOCKER-002 | **Resolved** (issue #5 / PR #8) — explicit handoff, authorization, freshness, same-confirmer, human-only approval, and audit-redaction controls are implemented and tested. Live connected-tenant role sourcing and propagation remain NOT RUN under RISK-020. |
 
 All other sub-tasks — fail-closed logic, validation, approval capture, audit events,
 error surface rules, draft label rules — are fully specified and implemented in
 `src/orchestration/`.
 
-See `docs/risks.md` for the exact human decisions required and
+See `docs/risks.md` for the remaining connected-tenant validation risk and
 `docs/workflow/copilot-studio-foundry-direct-connection.md` for the full connected-agent
 specification.
 

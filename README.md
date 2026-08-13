@@ -58,6 +58,60 @@ These boundaries are enforced by contract and are not configurable:
 
 ---
 
+## Architecture overview
+
+![Shift closeout architecture diagram: an authenticated nurse uses a Copilot Studio care-team experience on the left; past a labeled invocation boundary, a solid working P0 local deterministic simulation path and a dashed not-connected direct Copilot Studio to Foundry target path lead to exactly one Microsoft Foundry Shift Closeout Agent; BLOCKER-001 path selection is resolved; BLOCKER-002 repository identity and authorization controls are resolved and verified locally, while connected-tenant request, response, identity, and role validation remains not run under RISK-020; BLOCKER-003 is resolved with 7 of 7 bounded live Foundry evaluation cases passing; a synthetic FHIR-shaped source grounds the agent; deterministic controls sit outside generation and fail closed; a human approval path produces a minimal attributable audit event with no chart write; a time-back view is labeled illustrative only; a correlation ID trace spans request, generation, decision, and audit; and a configuration and token contract cuts across the whole diagram.](docs/architecture/diagrams/shift-closeout-architecture.svg)
+
+The diagram above follows the same StoryBrand frame as this README: the care
+team is the hero, Microsoft Copilot Studio and Microsoft Foundry are the
+guide, and the bounded, human-reviewed workflow is the plan that returns
+time without asking anyone to trust an unreviewed draft.
+
+**Legend.**
+
+- **Solid boxes and arrows** trace the path that is implemented and
+  exercised today: the nurse's request moves through the Copilot Studio
+  care-team experience, into the **P0 local deterministic simulation**
+  (`src/orchestration/foundry-adapter.mjs`, exercised by `npm run demo`),
+  which returns a contract-valid draft with no network call and no platform
+  dependency.
+- **Dashed boxes and arrows** trace the **live Copilot Studio → Foundry
+  binding**. ADR-20260813-011 resolves `BLOCKER-001` path selection by choosing
+  the preview direct connected-agent path, but the binding is **NOT CONNECTED**
+  and connected-tenant validation remains **NOT RUN** under `RISK-020`.
+  `BLOCKER-002` is resolved for the repository: explicit identity handoff,
+  authorization, stale-context, wrong-confirmer, human-only approval, and audit
+  redaction controls are implemented and exercised. That repository evidence
+  does **not** verify live identity or role propagation in a connected tenant.
+  The dashed path does not represent deployed connectivity or an end-to-end
+  Copilot Studio run. Separately, the isolated live Foundry agent passed all 7
+  bounded evaluation cases, resolving `BLOCKER-003`.
+- Regardless of which path produced it, every draft is grounded only in the
+  **synthetic FHIR-shaped source**, passes through **deterministic controls**
+  (identity, context, schema, safety, grounding, and correlation checks that
+  sit outside the probabilistic generation step and fail closed on any gap),
+  and must clear the **human approval path** before a minimal, attributable
+  **audit event** is recorded. No step writes to a chart or takes a
+  production action.
+- A single **correlation ID** (see
+  [`docs/conventions/correlation-id.md`](docs/conventions/correlation-id.md))
+  is minted per run and echoed unchanged across request, generation,
+  decision, and audit, so any run can be traced end to end.
+- The **time-back view** is illustrative only, and the
+  **configuration and token contract** (organization, persona, workflow,
+  care setting, terminology, and branding) is a cross-cutting concern
+  resolved from configuration, not hardcoded logic — Harborlight Children's
+  Hospital is the example-only configuration used throughout this repository,
+  and secrets and endpoints are always kept in separate, uncommitted
+  environment bindings.
+
+The editable source for this diagram is
+[`docs/architecture/diagrams/shift-closeout-architecture.excalidraw`](docs/architecture/diagrams/shift-closeout-architecture.excalidraw).
+When updating it, edit the Excalidraw source first, export the SVG, and keep
+the SVG title/description and README alt text synchronized with the source.
+
+---
+
 ## Getting started
 
 ### Prerequisites
@@ -109,7 +163,7 @@ failure.
 | `npm run test:fail-closed` | Exercises every one of the twelve fail-closed codes through the orchestration layer, including the user-safe message mapping. |
 | `npm run test:governance` | Exercises validation order, the PHI scan, approval binding, audit minimality, and illustrative metric labelling. |
 | `npm run evaluate:digest` | Recomputes the agent instruction digest and asserts it matches the shipped manifest and the provenance examples. |
-| `npm run evaluate:grounding` | Runs the local grounding evaluation set. Live Foundry evaluation evidence is recorded separately under issue #6. |
+| `npm run evaluate:grounding` | Runs the local deterministic grounding evaluation set. The separate bounded live Foundry evaluation passed 7/7 on 2026-08-13; see `docs/evidence/2026-08-13-foundry-live-evaluation.md`. |
 | `npm run test:unit` | Runs every test under `tests/`, including wrong-patient, malformed-output, prompt-injection, unsupported-fact, approval-bypass, secret-exposure, and the end-to-end journey test. |
 | `npm run demo` | Executes the local synthetic nurse journey, M1 to M6. |
 | `npm run verify` | Every command above in sequence. This is the integration gate. No work package is accepted without a recorded zero-exit run of this command. |
@@ -183,7 +237,7 @@ implemented** in this P0 prototype. They must not be implied as operational.
 |---|---|
 | Live EHR or production FHIR API integration | `FUTURE` |
 | Write-back to any system of record | `FUTURE` |
-| Production identity and role-claim enforcement | `FUTURE` — open BLOCKER-002 |
+| Production identity and role-claim enforcement | `FUTURE` — repository controls are implemented; connected-tenant validation is NOT RUN under RISK-020 |
 | Multiple agents or additional workflows | `FUTURE` |
 | Medication reconciliation | `FUTURE` |
 | Discharge coordination | `FUTURE` |
@@ -213,7 +267,7 @@ capabilities rule.
 | [`docs/demo/talk-track.md`](docs/demo/talk-track.md) | Spoken words for live demonstration delivery |
 | [`docs/architecture/decisions/`](docs/architecture/decisions/README.md) | Eleven accepted ADRs |
 | [`docs/architecture/copilot-studio-foundry-direct-connection.md`](docs/architecture/copilot-studio-foundry-direct-connection.md) | Direct connected-agent architecture and validation boundary |
-| [`docs/risks.md`](docs/risks.md) | Open blockers requiring human decisions and the risk register |
+| [`docs/risks.md`](docs/risks.md) | Blocker status, open validation risks, and the risk register |
 | [`docs/evidence/2026-08-12-integration-run.md`](docs/evidence/2026-08-12-integration-run.md) | Every validation command and its actual output from the integration run |
 | [`docs/assumptions.md`](docs/assumptions.md) | Verified-or-open assumptions the baseline depends on |
 | [`docs/conventions/draft-and-safety-status.md`](docs/conventions/draft-and-safety-status.md) | The three status fields, the twelve fail-closed codes, and the two confirmation gates |
@@ -241,12 +295,16 @@ honest about which platform steps have run:
 - **BLOCKER-001** — Resolved by ADR-20260813-011: use Copilot Studio's preview
   direct Microsoft Foundry connected-agent path. Power Automate is not the
   target intermediary.
-- **BLOCKER-002** — Role-claim authorization in Copilot Studio is unverified
-  in the target tenant. See `docs/risks.md`.
+- **BLOCKER-002** — Resolved for repository identity and authorization controls:
+  explicit handoff validation, authorized-role enforcement, stale-context and
+  wrong-confirmer rejection, human-only approval, and audit redaction are
+  implemented and tested. Live identity and role propagation in the target
+  Copilot Studio tenant remains **NOT RUN** under `RISK-020`.
 - **BLOCKER-003** — Resolved by issue #6: the isolated Foundry agent was
-  verified with zero tools and passed the bounded live evaluation suite.
+  verified with zero tools and passed all 7 bounded live evaluation cases.
 - **RISK-020** — Direct Copilot Studio connected-agent validation, including
-  request/response contract adaptation, is **NOT RUN**.
+  request/response contract adaptation and live identity/role handoff, is
+  **NOT RUN**.
 
 Contracts, synthetic data, governance utilities, orchestration, presentation,
 narrative, and this documentation are unblocked and complete for the local

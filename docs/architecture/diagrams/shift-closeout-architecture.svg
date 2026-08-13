@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1620 1510" width="1400" height="1305" role="img" aria-labelledby="diagram-title diagram-desc">
+<title id="diagram-title">Second Shift Reduction Accelerator — Shift Closeout Architecture</title>
+<desc id="diagram-desc">Architecture diagram for the Option A shift-closeout prototype. A nurse (hero) uses a Copilot Studio care-team experience to confirm patient and encounter, request a draft, review source references, and approve, reject, or request revision. Past the invocation boundary, the diagram distinguishes a solid, working P0 local deterministic simulation path from a dashed direct Copilot Studio-to-Foundry target path. BLOCKER-001 path selection and BLOCKER-002 repository identity and authorization controls are resolved, but the binding is not connected and connected-tenant request, response, identity, and role validation remains NOT RUN under RISK-020. A separate isolated live Foundry evaluation passed 7 of 7 bounded cases and resolved BLOCKER-003; neither repository evidence nor the isolated Foundry evidence claims connected Copilot Studio integration. Exactly one Microsoft Foundry Shift Closeout Agent, grounded only in an approved synthetic FHIR-shaped source, produces structured output with source references. Deterministic controls outside the probabilistic generation validate identity, context, schema, safety, grounding, and correlation, failing closed on any gap. A human approval path and a minimal attributable audit event follow, with no chart write and no production action. A time-back view is labeled ILLUSTRATIVE ONLY. A correlation ID trace links request, generation, decision, and audit. Organization configuration is a cross-cutting concern, with Harborlight Children's Hospital as an example-only configuration and secrets kept separate. Persistent notices state DRAFT — HUMAN REVIEW REQUIRED, synthetic data only, and no diagnosis, treatment, triage, or medication recommendation.</desc>
+<rect x="0" y="0" width="1620" height="1510" fill="#ffffff"/>
+<defs>
+<marker id="arrowhead-1e1e1e" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="#1e1e1e"/></marker>
+<marker id="arrowhead-107C10" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="#107C10"/></marker>
+<marker id="arrowhead-D13438" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="#D13438"/></marker>
+<marker id="arrowhead-0c8599" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="#0c8599"/></marker>
+<marker id="arrowhead-F7630C" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="#F7630C"/></marker>
+<marker id="arrowhead-5C2D91" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="#5C2D91"/></marker>
+<marker id="arrowhead-0078D4" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L10,5 L0,10 z" fill="#0078D4"/></marker>
+</defs>
+<text x="810" y="43" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="25" fill="#000000" text-anchor="middle"><tspan x="810" y="43">Second Shift Reduction Accelerator — Shift Closeout Architecture (Option A · P0 Prototype)</tspan></text>
+<rect x="30" y="95" width="1560" height="55" rx="8" fill="#FDE7E9" stroke="#D13438" stroke-width="2" />
+<text x="810" y="125.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15.5" fill="#000000" text-anchor="middle"><tspan x="810" y="125.5">DRAFT — HUMAN REVIEW REQUIRED   ·   Synthetic data only — no PHI or PII   ·   No diagnosis, treatment, triage, or medication recommendation</tspan></text>
+<rect x="30" y="165" width="1560" height="45" rx="8" fill="#F3F2F1" stroke="#1e1e1e" stroke-width="2" />
+<text x="810" y="192.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="middle"><tspan x="810" y="192.5">StoryBrand frame — Hero: the care team. Guide: Microsoft Copilot Studio + Foundry, governed. Plan: one bounded, human-reviewed workflow. Success: time returned to care, with trust intact.</tspan></text>
+<rect x="30" y="300" width="230" height="320" rx="8" fill="#DFF6DD" stroke="#107C10" stroke-width="2" />
+<text x="145" y="370" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14.5" fill="#000000" text-anchor="middle"><tspan x="145" y="370">Authenticated Nurse /</tspan><tspan x="145" y="390.3">Care Team</tspan><tspan x="145" y="410.6"></tspan><tspan x="145" y="430.9">— THE HERO —</tspan><tspan x="145" y="451.2"></tspan><tspan x="145" y="471.5">Requests shift closeout,</tspan><tspan x="145" y="491.79999999999995">confirms patient &amp;</tspan><tspan x="145" y="512.0999999999999">encounter, reviews the</tspan><tspan x="145" y="532.4">draft, and decides</tspan></text>
+<rect x="290" y="260" width="460" height="450" rx="8" fill="none" stroke="#0078D4" stroke-width="2" />
+<text x="520" y="289" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="17" fill="#000000" text-anchor="middle"><tspan x="520" y="289">Copilot Studio — Care-Team Experience</tspan></text>
+<rect x="305" y="315" width="430" height="72" rx="8" fill="#CFE4FA" stroke="#0078D4" stroke-width="2" />
+<text x="520" y="353.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="middle"><tspan x="520" y="353.5">Shift-closeout intent</tspan></text>
+<rect x="305" y="393" width="430" height="72" rx="8" fill="#CFE4FA" stroke="#0078D4" stroke-width="2" />
+<text x="520" y="431.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="middle"><tspan x="520" y="431.5">Synthetic patient + encounter confirmation</tspan></text>
+<rect x="305" y="471" width="430" height="72" rx="8" fill="#CFE4FA" stroke="#0078D4" stroke-width="2" />
+<text x="520" y="498.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="middle"><tspan x="520" y="498.5">Draft presentation —</tspan><tspan x="520" y="517.4">DRAFT · HUMAN REVIEW REQUIRED</tspan></text>
+<rect x="305" y="549" width="430" height="72" rx="8" fill="#CFE4FA" stroke="#0078D4" stroke-width="2" />
+<text x="520" y="587.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="middle"><tspan x="520" y="587.5">Source-reference review</tspan></text>
+<rect x="305" y="627" width="430" height="72" rx="8" fill="#CFE4FA" stroke="#0078D4" stroke-width="2" />
+<text x="520" y="665.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="middle"><tspan x="520" y="665.5">Approve / Reject / Request revision</tspan></text>
+<circle cx="720" cy="309" r="15" fill="#99e9f2" stroke="#0c8599" stroke-width="2"/>
+<text x="720" y="314" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#000000" text-anchor="middle">1</text>
+<text x="810" y="240" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="15" fill="#000000" text-anchor="middle"><tspan x="810" y="240">INVOCATION BOUNDARY</tspan></text>
+<path d="M 790 260 L 790 710" fill="none" stroke="#1e1e1e" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#arrowhead-1e1e1e)"/>
+<rect x="830" y="285" width="380" height="165" rx="8" fill="#DFF6DD" stroke="#107C10" stroke-width="2" />
+<text x="1020" y="327" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="middle"><tspan x="1020" y="327">P0 — Local Deterministic</tspan><tspan x="1020" y="345.9">Simulation (WORKING)</tspan><tspan x="1020" y="364.8">src/orchestration/foundry-adapter.mjs</tspan><tspan x="1020" y="383.7">npm run demo — contract-valid draft</tspan><tspan x="1020" y="402.6">No network call, no platform dependency.</tspan></text>
+<rect x="830" y="485" width="380" height="195" rx="8" fill="#FDE7E9" stroke="#D13438" stroke-width="2" stroke-dasharray="10 8"/>
+<text x="1020" y="533" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#000000" text-anchor="middle"><tspan x="1020" y="533">Live Copilot Studio → Foundry Binding</tspan><tspan x="1020" y="551.2">TARGET SELECTED / NOT CONNECTED</tspan><tspan x="1020" y="569.4">BLOCKER-001 path selection RESOLVED</tspan><tspan x="1020" y="587.6">BLOCKER-002 repository controls RESOLVED</tspan><tspan x="1020" y="605.8">RISK-020 connected-tenant validation NOT RUN</tspan><tspan x="1020" y="624">BLOCKER-003 resolved · 7/7 PASS</tspan></text>
+<path d="M 750 351 L 830 367.5" fill="none" stroke="#107C10" stroke-width="2.5"  marker-end="url(#arrowhead-107C10)"/>
+<rect x="652.8" y="339.5" width="164.4" height="26" fill="#ffffff" opacity="0.92" rx="4"/>
+<text x="660.8" y="356" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="start"><tspan x="660.8" y="356">local run — working</tspan></text>
+<path d="M 750 351 L 830 582.5" fill="none" stroke="#D13438" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#arrowhead-D13438)"/>
+<rect x="641.4" y="592.5" width="187.2" height="26" fill="#ffffff" opacity="0.92" rx="4"/>
+<text x="649.4" y="609" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="start"><tspan x="649.4" y="609">binding — not connected</tspan></text>
+<rect x="1250" y="260" width="330" height="450" rx="8" fill="#E8DAEF" stroke="#5C2D91" stroke-width="2" />
+<text x="1415" y="406.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14.5" fill="#000000" text-anchor="middle"><tspan x="1415" y="406.5">Microsoft Foundry</tspan><tspan x="1415" y="426.8">Shift Closeout Agent</tspan><tspan x="1415" y="447.1">(exactly one)</tspan><tspan x="1415" y="467.4"></tspan><tspan x="1415" y="487.7">• Versioned instructions</tspan><tspan x="1415" y="508">• Approved synthetic grounding</tspan><tspan x="1415" y="528.3">• Structured output</tspan><tspan x="1415" y="548.5999999999999">• Source references</tspan></text>
+<circle cx="1565" cy="254" r="15" fill="#99e9f2" stroke="#0c8599" stroke-width="2"/>
+<text x="1565" y="259" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#000000" text-anchor="middle">2</text>
+<path d="M 1210 367.5 L 1250 404" fill="none" stroke="#107C10" stroke-width="2.5"  marker-end="url(#arrowhead-107C10)"/>
+<rect x="1144" y="370" width="172" height="46" fill="#ffffff" opacity="0.92" rx="4"/>
+<text x="1152" y="386.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="start"><tspan x="1152" y="386.5">simulated call →</tspan><tspan x="1152" y="404">contract-valid draft</tspan></text>
+<path d="M 1210 582.5 L 1250 575" fill="none" stroke="#D13438" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#arrowhead-D13438)"/>
+<rect x="1135" y="595" width="190" height="26" fill="#ffffff" opacity="0.92" rx="4"/>
+<text x="1143" y="611.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="start"><tspan x="1143" y="611.5">connected call — not run</tspan></text>
+<rect x="830" y="770" width="380" height="150" rx="8" fill="#99e9f2" stroke="#0c8599" stroke-width="2" />
+<text x="1020" y="806" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#000000" text-anchor="middle"><tspan x="1020" y="806">Synthetic FHIR-shaped Source</tspan><tspan x="1020" y="824.2">System-of-record boundary</tspan><tspan x="1020" y="842.4">Patient · Encounter · Observation · Condition</tspan><tspan x="1020" y="860.6">CarePlan · ServiceRequest ·</tspan><tspan x="1020" y="878.8">Task · Communication</tspan></text>
+<path d="M 850 770 L 770 770 L 770 450 L 870 450" fill="none" stroke="#0c8599" stroke-width="2.5"  marker-end="url(#arrowhead-0c8599)"/>
+<rect x="751.8" y="742" width="126.39999999999999" height="46" fill="#ffffff" opacity="0.92" rx="4"/>
+<text x="759.8" y="758.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="start"><tspan x="759.8" y="758.5">same synthetic</tspan><tspan x="759.8" y="776">bundle</tspan></text>
+<path d="M 1210 800 L 1250 685" fill="none" stroke="#0c8599" stroke-width="2.5"  marker-end="url(#arrowhead-0c8599)"/>
+<rect x="1151.6" y="746" width="156.79999999999998" height="46" fill="#ffffff" opacity="0.92" rx="4"/>
+<text x="1159.6" y="762.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="start"><tspan x="1159.6" y="762.5">approved synthetic</tspan><tspan x="1159.6" y="780">grounding only</tspan></text>
+<rect x="1250" y="770" width="330" height="175" rx="8" fill="#FFF4CE" stroke="#F7630C" stroke-width="2" />
+<text x="1415" y="817" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="middle"><tspan x="1415" y="817">Deterministic Controls</tspan><tspan x="1415" y="835.9">(outside generation)</tspan><tspan x="1415" y="854.8">Identity · Context · Schema</tspan><tspan x="1415" y="873.7">Safety · Grounding · Correlation</tspan><tspan x="1415" y="892.6">Fail closed on any gap</tspan></text>
+<path d="M 1415 710 L 1415 770" fill="none" stroke="#F7630C" stroke-width="2.5"  marker-end="url(#arrowhead-F7630C)"/>
+<rect x="1282.4" y="721" width="225.2" height="46" fill="#ffffff" opacity="0.92" rx="4"/>
+<text x="1290.4" y="737.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="start"><tspan x="1290.4" y="737.5">structured output validated</tspan><tspan x="1290.4" y="755">(before presentation)</tspan></text>
+<rect x="1250" y="980" width="160" height="175" rx="8" fill="#DFF6DD" stroke="#107C10" stroke-width="2" />
+<text x="1330" y="1050" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="middle"><tspan x="1330" y="1050">Human Approval Path</tspan><tspan x="1330" y="1067.5">Approve · Reject ·</tspan><tspan x="1330" y="1085">Request revision</tspan></text>
+<rect x="1420" y="980" width="160" height="175" rx="8" fill="#DFF6DD" stroke="#107C10" stroke-width="2" />
+<text x="1500" y="1042" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="11.5" fill="#000000" text-anchor="middle"><tspan x="1500" y="1042">Minimal Attributable</tspan><tspan x="1500" y="1058.1">Audit Event</tspan><tspan x="1500" y="1074.2">No chart write.</tspan><tspan x="1500" y="1090.3">No production action.</tspan></text>
+<circle cx="1398" cy="974" r="15" fill="#99e9f2" stroke="#0c8599" stroke-width="2"/>
+<text x="1398" y="979" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#000000" text-anchor="middle">3</text>
+<circle cx="1568" cy="974" r="15" fill="#99e9f2" stroke="#0c8599" stroke-width="2"/>
+<text x="1568" y="979" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#000000" text-anchor="middle">4</text>
+<path d="M 1415 945 L 1330 980" fill="none" stroke="#F7630C" stroke-width="2.5"  marker-end="url(#arrowhead-F7630C)"/>
+<rect x="1419" y="958.5" width="172" height="26" fill="#ffffff" opacity="0.92" rx="4"/>
+<text x="1427" y="975" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="start"><tspan x="1427" y="975">validated draft only</tspan></text>
+<path d="M 1330 980 L 1200 700 L 1550 725 L 1550 710" fill="none" stroke="#5C2D91" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#arrowhead-5C2D91)"/>
+<rect x="1064.2" y="688" width="141.6" height="46" fill="#ffffff" opacity="0.92" rx="4"/>
+<text x="1072.2" y="704.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="start"><tspan x="1072.2" y="704.5">bounded revision</tspan><tspan x="1072.2" y="722">(maxRevisions)</tspan></text>
+<path d="M 1298 1155 L 1298 1205 L 520 1205 L 520 710" fill="none" stroke="#0078D4" stroke-width="2.5"  marker-end="url(#arrowhead-0078D4)"/>
+<rect x="606" y="1161" width="248" height="46" fill="#ffffff" opacity="0.92" rx="4"/>
+<text x="614" y="1177.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="start"><tspan x="614" y="1177.5">decision &amp; disclaimer surfaced</tspan><tspan x="614" y="1195">to the nurse in Copilot Studio</tspan></text>
+<rect x="830" y="980" width="380" height="175" rx="8" fill="#F3F2F1" stroke="#1e1e1e" stroke-width="2" />
+<text x="1020" y="1037.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="middle"><tspan x="1020" y="1037.5">Time-Back View — ILLUSTRATIVE ONLY</tspan><tspan x="1020" y="1056.4">Baseline vs. assisted duration ·</tspan><tspan x="1020" y="1075.3">illustrative time returned.</tspan><tspan x="1020" y="1094.2">Not a measured outcome.</tspan></text>
+<path d="M 1500 1155 L 1500 1170 L 1020 1170 L 1020 1155" fill="none" stroke="#1e1e1e" stroke-width="2.5"  marker-end="url(#arrowhead-1e1e1e)"/>
+<rect x="1017.8" y="1186" width="354.4" height="26" fill="#ffffff" opacity="0.92" rx="4"/>
+<text x="1025.8" y="1202.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="12.5" fill="#000000" text-anchor="start"><tspan x="1025.8" y="1202.5">illustrative dashboard fed by audit evidence</tspan></text>
+<text x="30" y="1254" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#000000" text-anchor="start"><tspan x="30" y="1254">Correlation ID trace:  ① Request (Copilot Studio)  →  ② Generation (Foundry Agent)  →  ③ Decision (Human Approval)  →  ④ Audit (Audit Event)</tspan></text>
+<text x="30" y="1278" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#000000" text-anchor="start"><tspan x="30" y="1278">One CORR-YYYYMMDD-&lt;32 hex&gt; identifier is minted per run and echoed unchanged by every stage. See docs/conventions/correlation-id.md.</tspan></text>
+<rect x="30" y="1305" width="1560" height="75" rx="8" fill="#F3F2F1" stroke="#1e1e1e" stroke-width="2" />
+<text x="810" y="1334" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="middle"><tspan x="810" y="1334">Cross-cutting configuration &amp; token contract — organization, persona, workflow, care setting, terminology pack, and branding come from config, not hardcoded logic.</tspan><tspan x="810" y="1352.9">Harborlight Children's Hospital is the EXAMPLE-ONLY configuration. Secrets, tenant IDs, and endpoints live in separate environment bindings and are never committed.</tspan></text>
+<rect x="30" y="1395" width="1560" height="85" rx="8" fill="none" stroke="#1e1e1e" stroke-width="2" />
+<path d="M 55 1422 L 175 1422" fill="none" stroke="#107C10" stroke-width="2.5"  marker-end="url(#arrowhead-107C10)"/>
+<text x="190" y="1422.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="start"><tspan x="190" y="1422.5">Solid line / box — working, local, deterministic P0 path (exercised by npm run demo).</tspan></text>
+<path d="M 55 1455 L 175 1455" fill="none" stroke="#D13438" stroke-width="2.5" stroke-dasharray="9 7" marker-end="url(#arrowhead-D13438)"/>
+<text x="190" y="1455.5" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13.5" fill="#000000" text-anchor="start"><tspan x="190" y="1455.5">Dashed — target NOT CONNECTED; BLOCKER-001 + BLOCKER-002 repository controls RESOLVED; RISK-020 connected-tenant validation NOT RUN; BLOCKER-003 7/7 PASS.</tspan></text>
+</svg>

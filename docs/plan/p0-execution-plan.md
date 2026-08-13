@@ -167,10 +167,10 @@ node agent/evaluation/check-instruction-digest.mjs
 | | |
 |---|---|
 | Owner | Tank |
-| Depends on | WP-00, WP-01; live binding depends on BLOCKER-002 and RISK-020 validation |
+| Depends on | WP-00, WP-01; live binding depends on RISK-020 connected-tenant validation |
 | Requirements | REQ-WF-001 to 007, REQ-SCOPE-001, REQ-SCOPE-004, REQ-SAFE-004, REQ-AUD-001, REQ-AUD-004 |
 | Target files | `workflow/copilot-studio/shift-closeout-topic.md`, `workflow/copilot-studio/*.yaml`, `src/orchestration/**`, `docs/workflow/fail-closed-catalog.md`, `docs/workflow/experience-flow.md` |
-| Status | **Complete locally; target path decided; direct validation NOT RUN** — orchestration runs end to end against the synthetic dataset. ADR-20260813-011 resolves BLOCKER-001 with the direct Foundry connected-agent path. Target-tenant request/response adaptation remains untested under RISK-020, and role-claim authorization remains blocked by BLOCKER-002. |
+| Status | **Complete locally; target path and repository identity controls resolved; connected-tenant validation NOT RUN** — orchestration runs end to end against the synthetic dataset. ADR-20260813-011 resolves BLOCKER-001 with the direct Foundry connected-agent path. PR #8 resolves BLOCKER-002 for repository identity, authorization, context, approval, and audit controls. Target-tenant request/response and identity/role adaptation remain untested under RISK-020. |
 
 **Scope.** The single shift-closeout experience: authenticated request, patient
 and encounter confirmation, draft presentation, source-reference inspection,
@@ -201,9 +201,10 @@ node src/orchestration/test/run-fail-closed-catalog.mjs
 node scripts/validate-docs.mjs
 ```
 
-**Outstanding sub-tasks.** Direct connected-agent validation is **NOT RUN**
-under RISK-020. Role-claim authorization waits on BLOCKER-002 in
-`docs/risks.md`. All other sub-tasks proceed.
+**Outstanding sub-tasks.** Connected-tenant validation is **NOT RUN** under
+RISK-020, including request/response adaptation and live identity/role handoff.
+The repository controls that receive and enforce that handoff are implemented
+and tested, resolving BLOCKER-002 locally. All other sub-tasks proceed.
 
 ### WP-05 — Foundry agent deployment and binding
 
@@ -366,7 +367,8 @@ and `data/synthetic/bundles/SYN-BDL-PEDBDL01.json`. Full command output is in
 Generation ran through the documented simulation boundary in this 2026-08-12
 record. Subsequent issue #6 evidence completed the live Foundry agent evaluation.
 The direct Copilot Studio connected-agent binding remains **NOT RUN** under
-RISK-020, and BLOCKER-002 remains open.
+RISK-020. BLOCKER-002 is resolved for repository controls; this historical
+milestone run is not connected-tenant evidence.
 
 ## Dependency order
 
@@ -409,8 +411,9 @@ Run from the repository root.
 
 1. **After WP-01, WP-02, WP-03, WP-06.** Trinity runs `npm run validate`, reviews
    contract conformance, and updates risk status. No demonstration yet.
-2. **After WP-04 and WP-05.** Trinity confirms BLOCKER-001 and BLOCKER-003 are
-   resolved, records BLOCKER-002 and RISK-020 explicitly, and exercises M1 to M4.
+2. **After WP-04 and WP-05.** Trinity confirms BLOCKER-001 through BLOCKER-003
+   are resolved at their documented repository/platform evidence boundaries,
+   records RISK-020 explicitly, and exercises M1 to M4.
 3. **After WP-07 and WP-08.** Trinity exercises M5 and M6 and records the
    milestone acceptance.
 

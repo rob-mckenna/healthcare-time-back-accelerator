@@ -19,7 +19,7 @@ recorded in [`evidence/`](evidence/2026-08-12-integration-run.md).
 | [Requirements matrix](traceability/requirements-matrix.md) | Every `REQ-*` identifier, its charter source, owner, contract, and validation command |
 | [Architecture decisions](architecture/decisions/README.md) | Eleven accepted ADRs with the reasoning behind the baseline |
 | [Direct connected-agent architecture](architecture/copilot-studio-foundry-direct-connection.md) | Target Copilot Studio-to-Foundry path, control boundaries, and NOT RUN status |
-| [Risks](risks.md) | Open blockers requiring a human decision, plus the risk register |
+| [Risks](risks.md) | Blocker status, open validation risks, and the risk register |
 | [Assumptions](assumptions.md) | What the baseline depends on that has not been verified |
 | [Run evidence](evidence/2026-08-12-integration-run.md) | Every validation command and its actual output from the integration run |
 
