@@ -9,14 +9,23 @@
 > **SIMULATION BOUNDARY NOTICE**
 >
 > This document specifies the Copilot Studio topic for the shift-closeout experience.
-> Direct Copilot Studio-to-Foundry invocation binding is pending resolution of
-> **BLOCKER-001** (invocation model unverified) and **BLOCKER-002** (role claim
-> availability unverified) in `docs/risks.md`. The topic specification is complete;
-> the live binding implementation follows when those blockers are resolved.
+> **BLOCKER-001 invocation model is resolved** (issue #4): Copilot Studio's preview
+> **Agents → Add an agent → Connect to an external agent → Microsoft Foundry** path,
+> using a new-portal Foundry project endpoint and Agent Id. This supersedes the
+> Power Automate proxy option previously recorded for BLOCKER-001. See
+> `docs/workflow/copilot-studio-foundry-direct-connection.md` for the full
+> specification, official citation, adaptation boundary, and exception paths.
 >
-> Per ADR-20260812-010, this document does not contain working platform
-> configuration for unverified product behavior. See `docs/risks.md` BLOCKER-001
-> and BLOCKER-002 for the decision required and the recommended resolution path.
+> **BLOCKER-002** (role claim availability unverified) remains open and is tracked by
+> issue #5. The Microsoft Foundry connector documentation does not describe end-user
+> Entra identity or role-claim propagation of any kind — this topic never assumes the
+> Foundry connection supplies identity or authorization. Every invocation is gated by
+> the explicit, validated requester context this topic builds independently (Step 1).
+>
+> Issue #6 is resolved and supplies the new-portal Foundry agent. Direct
+> Copilot Studio connected-agent validation is still **NOT RUN**: no Copilot
+> Studio connection or request/response adaptation has been tested in a target
+> tenant.
 
 ---
 
@@ -29,7 +38,8 @@
 | Entry point | User intent: "I need to close out my shift" |
 | Conversation surface | Copilot Studio (Microsoft 365 Copilot embedded experience or standalone agent) |
 | Authentication | System-topic `AuthenticateUser` required before any node in this topic |
-| Authorization | `roleCode` must be in `personas.authorizedRoleCodes`; see BLOCKER-002 |
+| Authorization | `roleCode` must be in `personas.authorizedRoleCodes`; resolved and enforced entirely inside this topic — see BLOCKER-002 / issue #5. Never assumed from the Foundry connection. |
+| Agent invocation | Connected agent via **Agents → Add an agent → Connect to an external agent → Microsoft Foundry** (preview, standard harness). One Copilot Studio agent, one connected Foundry agent. See `docs/workflow/copilot-studio-foundry-direct-connection.md`. |
 | Draft label | `DRAFT — HUMAN REVIEW REQUIRED` on every surface that renders the artifact |
 
 ---
@@ -44,7 +54,11 @@ acceptance criteria (`docs/plan/p0-execution-plan.md`).
 1. Call `System.AuthenticateUser` to obtain an authenticated session.
 2. If authentication fails: surface `errorMessageOverrides["E-IDENTITY-MISSING"]`
    from the configuration pack. End the topic.
-3. Resolve the user's `roleCode` — see BLOCKER-002 for the pending resolution path.
+3. Resolve the user's `roleCode` — see BLOCKER-002 / issue #5 for the pending
+   resolution path. The Foundry connected-agent documentation does not describe
+   any mechanism for propagating end-user identity or role claims, so this
+   resolution happens entirely inside the topic (or a system it calls directly),
+   never inside or via the connected-agent action node in Step 3.
 4. If `roleCode` is absent or not in `personas.authorizedRoleCodes`: surface
    `errorMessageOverrides["E-IDENTITY-MISSING"]`. End the topic.
 5. Build `actorRef` as `USR-{opaque-reference}` — never include a display name,
@@ -53,6 +67,9 @@ acceptance criteria (`docs/plan/p0-execution-plan.md`).
    through every turn. Display the short reference (last 8 chars) as `Ref {hex}`.
 
 **Fail closed:** Any gap in steps 1–6 emits `E-IDENTITY-MISSING` and ends the topic.
+The connected-agent action node in Step 3 must be structurally unreachable unless
+steps 1–6 have completed successfully. The cited documentation does not establish
+an authorization check for this accelerator's requester context.
 
 ### Step 2 — Patient and encounter confirmation (M2)
 
@@ -71,9 +88,19 @@ acceptance criteria (`docs/plan/p0-execution-plan.md`).
 
 1. Show a progress indicator: "{shiftLabel} draft is being prepared…"
 2. Assemble the agent input payload per `contracts/schemas/shift-closeout-agent-input.schema.json`.
-3. Invoke the Shift Closeout Agent via the configured invocation path — see BLOCKER-001.
+3. Invoke the Shift Closeout Agent through a connected-agent action created via
+   **Agents → Add an agent → Connect to an external agent → Microsoft Foundry**
+   (preview, standard harness), addressed by the configured Foundry project
+   endpoint connection and Agent Id. See
+   `docs/workflow/copilot-studio-foundry-direct-connection.md` for the supported
+   setup sequence and the accelerator's adaptation requirements. The cited
+   Microsoft documentation does not define transport for this repository's JSON
+   contracts. The exact request/response adaptation must be authored and
+   validated in the target tenant. This direct invocation is **NOT RUN**.
 4. On timeout (`E-AGENT-TIMEOUT`): surface the configured message. End the topic.
-5. On agent error (`E-AGENT-ERROR`): surface the configured message. End the topic.
+5. On agent error (`E-AGENT-ERROR`) — including a missing/removed Foundry
+   connection or an unresolvable Agent Id: surface the configured message. End
+   the topic.
 6. Validate the agent output through the deterministic validation layer:
    - Schema validation → `E-OUTPUT-SCHEMA-INVALID`
    - Safety assertions → `E-SAFETY-FLAG`
@@ -180,11 +207,33 @@ If any of these elements cannot be rendered, the surface must not render the dra
 
 | Sub-task | Blocker | Status |
 |---|---|---|
-| Live Copilot Studio-to-Foundry binding | BLOCKER-001 | Blocked — pending human decision |
-| Role claim resolution from directory | BLOCKER-002 | Blocked — pending human decision |
+| Copilot Studio-to-Foundry invocation model decision | BLOCKER-001 | **Resolved** (issue #4, ADR-20260813-011) — direct Foundry connected-agent path. Issue #6 supplied and validated the Foundry agent; direct Copilot Studio binding and contract adaptation remain **NOT RUN** under RISK-020. |
+| Role claim resolution from directory | BLOCKER-002 | Blocked — pending human decision, tracked by issue #5. Not satisfied by the Foundry connection; resolved entirely inside the topic. |
 
 All other sub-tasks — fail-closed logic, validation, approval capture, audit events,
 error surface rules, draft label rules — are fully specified and implemented in
 `src/orchestration/`.
 
-See `docs/risks.md` for the exact human decisions required.
+See `docs/risks.md` for the exact human decisions required and
+`docs/workflow/copilot-studio-foundry-direct-connection.md` for the full connected-agent
+specification.
+
+---
+
+## 6. Connected-agent exception paths
+
+These are accelerator handling requirements for conditions observed around the
+Foundry connected-agent invocation. They do not claim that the connector exposes
+these exact native error categories. Full detail is in
+`docs/workflow/copilot-studio-foundry-direct-connection.md`.
+
+| Exception | Mapped code |
+|---|---|
+| Missing connection (Foundry connection removed or authentication to it fails) | `E-AGENT-ERROR` |
+| Unavailable agent (Agent Id unresolvable, or the connected agent does not respond within `operations.agentTimeoutMs`) | `E-AGENT-ERROR` or `E-AGENT-TIMEOUT` |
+| Invalid output (schema, safety, or grounding validation fails) | `E-OUTPUT-SCHEMA-INVALID`, `E-SAFETY-FLAG`, or `E-GROUNDING-FAILURE` |
+| Correlation mismatch (echoed `correlationId` does not match the value sent) | `E-OUTPUT-SCHEMA-INVALID` |
+| Authorization context absent (the connected-agent action node is reached without a validated `actorRef`/`roleCode`) | `E-IDENTITY-MISSING` |
+
+No new fail-closed code is introduced by the connected-agent binding; every condition maps to
+an existing entry in `contracts/schemas/common/definitions.schema.json#/$defs/failClosedCode`.

@@ -23,11 +23,11 @@ product behaviour, it stays an assumption until evidence replaces it, per
 
 | ID | Assumption | Owner | If wrong | Confidence |
 |---|---|---|---|---|
-| ASM-006 | A Copilot Studio environment and a Microsoft Foundry project are available to the team for P0 | Tank, Neo | The slice cannot be demonstrated end to end; the contracts and validation harness still stand | Medium |
-| ASM-007 | The Copilot Studio experience can call the Foundry agent and receive a structured payload within an interactive timeout | Tank | See BLOCKER-001 in `docs/risks.md`; the proxy-flow option becomes mandatory | Low, unverified |
+| ASM-006 | A target Copilot Studio environment is available to the team for P0 | Tank | The direct connected-agent path cannot be validated end to end; the contracts and local harness still stand | Low, unverified. The Foundry project is verified under issue #6; Copilot Studio tenant access is not evidenced |
+| ASM-007 | The preview direct connected-agent path can be authored to preserve the accelerator's validated request and response contracts within an interactive timeout | Tank | See RISK-020 in `docs/risks.md`; the binding remains NOT RUN and the local simulation boundary stays active | Low, unverified |
 | ASM-008 | Directory role information can be made available to the authorization check in some supported form | Tank | See BLOCKER-002; a labelled synthetic role fixture is the fallback | Low, unverified |
-| ASM-009 | The Foundry agent can be configured with external retrieval and knowledge augmentation disabled | Neo | See BLOCKER-003; the grounding check becomes the only control and prevention is lost | Medium, unverified |
-| ASM-010 | Agent instructions can be maintained as versioned files in this repository and applied to the deployed agent | Neo | Reproducibility by instruction digest is lost and RISK-009 escalates | Medium |
+| ASM-009 | The Foundry agent can be configured with external retrieval and knowledge augmentation disabled | Neo | See BLOCKER-003; the grounding check becomes the only control and prevention is lost | Verified 2026-08-13 — zero tools attached; BLOCKER-003 resolved |
+| ASM-010 | Agent instructions can be maintained as versioned files in this repository and applied to the deployed agent | Neo | Reproducibility by instruction digest is lost and RISK-009 escalates | Verified 2026-08-13 — deployed instruction digest matched the repository manifest |
 | ASM-011 | Node.js 20 or later with npm is available wherever validation is run | Trinity | Validation cannot execute; no alternative runtime is provided | High |
 | ASM-012 | Audit evidence in P0 is written to a simple local store, not to an enterprise logging platform | Morpheus | Retention, access control, and query behaviour would all need revisiting | High |
 
@@ -61,6 +61,9 @@ risk or a blocker in `docs/risks.md`.
 Last reviewed 2026-08-12 at the WP-09 integration checkpoint. ASM-016 and ASM-017
 were verified against the recorded run in
 `docs/evidence/2026-08-12-integration-run.md` and now carry that evidence.
-ASM-006 to ASM-009 are unchanged: no live Copilot Studio or Foundry environment
-was reached in this integration, so nothing about live platform behaviour was
-verified.
+The 2026-08-12 review left ASM-006 through ASM-009 unverified. Issue #6
+subsequently verified the Foundry project, deployed instruction digest, zero-tool
+configuration, and live agent behavior. ASM-009 and ASM-010 now carry that
+evidence. Copilot Studio tenant access and the direct connected-agent
+request/response adaptation remain unverified under ASM-006, ASM-007, and
+RISK-020.

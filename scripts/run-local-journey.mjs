@@ -16,9 +16,9 @@
  *       approval and the refused revision past the configured limit
  *   M6  correlated audit evidence and the illustrative time-back view
  *
- * Generation is a documented simulation boundary. Live Microsoft Foundry
- * invocation is blocked by BLOCKER-001 and BLOCKER-003 in docs/risks.md, and this
- * script never claims otherwise.
+ * Generation is a documented simulation boundary. Issue #6 separately records
+ * successful live Foundry-agent evaluation; direct Copilot Studio connected-agent
+ * validation remains NOT RUN under RISK-020, and this script never claims otherwise.
  *
  * Usage:
  *   node scripts/run-local-journey.mjs [--org harborlight] [--json <path>] [--quiet]
@@ -397,7 +397,8 @@ async function main() {
     runAt: utcNow(),
     organizationId: orgConfig.organizationId,
     generationBoundary: IS_SIMULATION_BOUNDARY ? SIMULATION_BOUNDARY_LABEL : 'live',
-    liveFoundryEvaluation: 'NOT RUN — BLOCKER-003 open (docs/risks.md)',
+    liveFoundryEvaluation: 'PASS — separate issue #6 evidence; not invoked by this local run',
+    directConnectedAgentValidation: 'NOT RUN — RISK-020 open (docs/risks.md)',
     correlationIds: { primaryRun: run1.correlationId, rejectionRun: run3.correlationId },
     decisionsExercised: ['revision-requested', 'rejected', 'approved'],
     draftStatus: draft.draftStatus,

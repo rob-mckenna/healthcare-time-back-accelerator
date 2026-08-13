@@ -326,7 +326,7 @@ implemented**. They must not be implied as operational in any demonstration.
 | Capability | Status |
 |---|---|
 | Live EHR or FHIR API integration | `FUTURE` — not implemented |
-| Production identity and role-claim enforcement | `FUTURE` — not implemented; BLOCKER-001 and BLOCKER-002 are open |
+| Production identity and role-claim enforcement | `FUTURE` — not implemented; BLOCKER-002 is open |
 | Write-back to any system of record | `FUTURE` — not implemented |
 | Real patient data or PHI | Permanently out of scope for this prototype |
 | Family or patient communication | Permanently out of scope |
@@ -337,10 +337,10 @@ implemented**. They must not be implied as operational in any demonstration.
 | Azure API Management production configuration | `FUTURE` — not implemented |
 | Enterprise-scale infrastructure automation | `FUTURE` — not implemented |
 
-The experience-to-agent binding (BLOCKER-001) and role-claim authorization
-(BLOCKER-002) are open blockers requiring a human decision before the
-demonstrated production path is fully operational. The demonstration must
-state these explicitly whenever a live binding is shown.
+The direct experience-to-agent path is selected by ADR-20260813-011, but direct
+connected-agent validation is **NOT RUN** under RISK-020. Role-claim
+authorization remains open under BLOCKER-002. The demonstration must state
+these explicitly whenever a live binding is discussed.
 
 ---
 
