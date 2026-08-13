@@ -17,7 +17,8 @@ recorded in [`evidence/`](evidence/2026-08-12-integration-run.md).
 |---|---|
 | [P0 execution plan](plan/p0-execution-plan.md) | Work packages, owners, dependencies, file ownership, acceptance criteria, validation commands, and milestone acceptance for the nurse journey |
 | [Requirements matrix](traceability/requirements-matrix.md) | Every `REQ-*` identifier, its charter source, owner, contract, and validation command |
-| [Architecture decisions](architecture/decisions/README.md) | Ten accepted ADRs with the reasoning behind the baseline |
+| [Architecture decisions](architecture/decisions/README.md) | Eleven accepted ADRs with the reasoning behind the baseline |
+| [Direct connected-agent architecture](architecture/copilot-studio-foundry-direct-connection.md) | Target Copilot Studio-to-Foundry path, control boundaries, and NOT RUN status |
 | [Risks](risks.md) | Open blockers requiring a human decision, plus the risk register |
 | [Assumptions](assumptions.md) | What the baseline depends on that has not been verified |
 | [Run evidence](evidence/2026-08-12-integration-run.md) | Every validation command and its actual output from the integration run |
@@ -69,5 +70,7 @@ synthetic nurse journey. Individual commands are `npm run validate:contracts`,
 `npm run evaluate:grounding`, `npm run test:unit`, and `npm run demo`. Each
 exits non-zero on failure.
 
-Live Microsoft Foundry evaluation is not part of any of these commands. It is
-blocked by BLOCKER-003 in [risks](risks.md) and is reported as `NOT RUN`.
+Live Microsoft Foundry evaluation is not part of these commands; issue #6
+records the separate 7/7 live result. Direct Copilot Studio connected-agent
+validation is also outside these commands and remains **NOT RUN** under
+RISK-020 in [risks](risks.md).

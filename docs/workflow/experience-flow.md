@@ -84,8 +84,10 @@ Each milestone has a defined acceptance condition in
 1. The system shows a progress indicator using `terminology.shiftLabel`.
 2. The agent input is assembled per `contracts/schemas/shift-closeout-agent-input.schema.json`
    and validated. Invalid input is refused with `E-INPUT-SCHEMA-INVALID`.
-3. The Shift Closeout Agent is invoked via the configured path
-   (pending BLOCKER-001 resolution; simulation boundary active in the prototype).
+3. The target path is the preview direct Microsoft Foundry connected-agent
+   binding selected by ADR-20260813-011. The local prototype still uses the
+   simulation boundary; direct Copilot Studio connected-agent validation is
+   **NOT RUN**.
 4. The output is validated in fixed order before any content is rendered:
    a. Schema validation — `E-OUTPUT-SCHEMA-INVALID`
    b. Safety assertions (9 fields) — `E-SAFETY-FLAG`
@@ -256,11 +258,12 @@ is hardcoded in the orchestration layer. The Harborlight pack at
 
 | Sub-task | Blocker | Impact |
 |---|---|---|
-| Live Copilot Studio-to-Foundry binding | BLOCKER-001 | Orchestration logic and validation are complete; the live invocation binding awaits human decision |
+| Direct Copilot Studio-to-Foundry validation | RISK-020 | The path decision is resolved; target-tenant connection and request/response adaptation are **NOT RUN** |
 | Role claim resolution | BLOCKER-002 | Authorization check is implemented; the live claim source awaits human decision |
 
 All fail-closed logic, validation, approval capture, audit events, and draft label
-rules are fully implemented and tested. See `docs/risks.md` for the exact decisions required.
+rules are fully implemented and tested locally. See `docs/risks.md` for the
+remaining live-platform decisions and validation gaps.
 
 ## Running the flow locally
 

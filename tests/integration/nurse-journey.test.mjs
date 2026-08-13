@@ -73,8 +73,10 @@ test('all three decision paths were exercised', () => {
 test('generation stayed on the documented simulation boundary', () => {
   const r = record();
   assert.match(r.generationBoundary, /SIMULATION/i);
-  assert.match(r.liveFoundryEvaluation, /NOT RUN/);
-  assert.match(r.liveFoundryEvaluation, /BLOCKER-003/);
+  assert.match(r.liveFoundryEvaluation, /PASS/);
+  assert.match(r.liveFoundryEvaluation, /issue #6/);
+  assert.match(r.directConnectedAgentValidation, /NOT RUN/);
+  assert.match(r.directConnectedAgentValidation, /RISK-020/);
 });
 
 test('the run record shows the draft label and separate correlated runs', () => {
