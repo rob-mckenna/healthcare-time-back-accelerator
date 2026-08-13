@@ -1,20 +1,20 @@
 # Agent Deployment Guide
 
 **Owner:** Neo — Foundry Agent Engineer
-**Status:** Agent provisioned and verified (no tools attached); live behavioral
-evaluation blocked pending a human capacity decision — BLOCKER-003 partially
-answered, still open.
+**Status:** Agent provisioned and verified (no tools attached). Live behavioral
+evaluation ran 7/7 passing on 2026-08-13 after a human-authorized capacity
+increase. BLOCKER-003 resolved.
 
 ---
 
 > **BLOCKER-003 — Foundry external retrieval default must be verified and disabled.**
 >
-> The tool/retrieval-configuration half of this blocker is verified below
-> (2026-08-13). Live behavioral evaluation could not run because the
-> authorized deployment capacity cannot admit a single agent-mediated call —
-> see `docs/evidence/2026-08-13-foundry-agent-provisioning.md`. No
-> demonstration of live-generated content proceeds until a human answers the
-> capacity decision recorded in `docs/risks.md` §BLOCKER-003.
+> **Resolved.** The tool/retrieval-configuration half was verified 2026-08-13
+> (no tools attached, no hosted agents/capability host/ACR). The live
+> behavioral-evaluation half ran after a human-authorized capacity increase
+> (`GlobalStandard` capacity `1` → `10`) and all 7 bounded evaluation cases
+> passed. See `docs/evidence/2026-08-13-foundry-agent-provisioning.md` and
+> `docs/evidence/2026-08-13-foundry-live-evaluation.md`.
 
 ---
 
@@ -32,14 +32,14 @@ deployment configuration evidence required by ADR-20260812-008 and BLOCKER-003.
 |---|---|
 | Agent name | `shift-closeout-agent` |
 | Project/environment | `second-shift-p0-dev`, `eastus2` (isolated, non-production) |
-| Model deployment | `gpt-4.1-mini`, version `2025-04-14`, SKU `GlobalStandard`, capacity `1` |
+| Model deployment | `gpt-4.1-mini`, version `2025-04-14`, SKU `GlobalStandard`, capacity `10` |
 | Instruction version | 1.0.0 |
 | Instruction SHA-256 | `f9020da9288314426d3481c281233442e7359a2f893608aa5fb87fc85b401f96` (matches live agent definition, verified 2026-08-13) |
 | Output contract version | 1.0.0 |
 | Endpoint | environment value, never committed — resolved locally via `azd env get-values` in `infra/foundry/` |
 | Agent ID | environment value, never committed |
-| Tools attached | **None** — verified via SDK: the `tools` key is absent from the live agent definition |
-| Model config ref | Not yet exercised in a live output; no live invocation succeeded (see below) |
+| Tools attached | **None** — verified via SDK: the `tools` key is absent from the live agent definition (reverified after the 2026-08-13 capacity change) |
+| Model config ref | `shift-closeout-agent-config-v1` — echoed by the model in every 2026-08-13 live-evaluation response, supplied to the model as a runtime-provenance constant (the model has no tool to look this value up itself) |
 
 ---
 
@@ -58,15 +58,19 @@ to this document or its linked decision record.
 - [x] The agent deployment endpoint and agent ID have been recorded in the
   environment bindings (not in this file or any committed file). — Recorded
   only in the local, gitignored azd environment state.
-- [ ] A test invocation with the example input returns output that validates
+- [x] A test invocation with the example input returns output that validates
   against `shift-closeout-agent-output.schema.json` with a non-zero exit code
-  from `node scripts/validate-contracts.mjs`. — **Blocked.** Every
-  agent-mediated invocation returned HTTP 429 `rate_limit_exceeded`; no
-  invocation completed, so no output exists to validate. See
-  `docs/evidence/2026-08-13-foundry-agent-provisioning.md`.
-- [ ] `node agent/evaluation/run-grounding-evaluation.mjs` passes against the
-  live invocation result (not the example set placeholder). — **Blocked** for
-  the same reason.
+  from `node scripts/validate-contracts.mjs`. — **Done 2026-08-13.** After a
+  human-authorized capacity increase (`1` → `10`), the `valid-structured-draft`
+  live evaluation case produced a fully schema-valid output (25/25 validator
+  checks). See `docs/evidence/2026-08-13-foundry-live-evaluation.md`.
+- [x] `node agent/evaluation/run-grounding-evaluation.mjs` passes against the
+  live invocation result (not the example set placeholder). — **Done
+  2026-08-13** via the equivalent live-output validator,
+  `agent/evaluation/validate-live-output.mjs` (same deterministic-check
+  philosophy), for all 7 bounded live evaluation cases. See
+  `agent/deployment/live-evaluation-results.json` and
+  `docs/agent/grounding-evaluation.md`.
 
 ---
 
@@ -137,11 +141,11 @@ runtime and must never be committed to the repository. See
 
 | Item | Evidence |
 |---|---|
-| External retrieval disabled | **Verified 2026-08-13.** No `tools` key present on the live agent definition (SDK query). See `docs/evidence/2026-08-13-foundry-agent-provisioning.md`. |
+| External retrieval disabled | **Verified 2026-08-13.** No `tools` key present on the live agent definition (SDK query); reverified unchanged after the capacity increase. See `docs/evidence/2026-08-13-foundry-agent-provisioning.md`. |
 | Knowledge augmentation disabled | **Verified 2026-08-13.** Same evidence — no tool of any kind attached. |
-| Test invocation result | **Blocked.** Every agent-mediated invocation returned HTTP 429 `rate_limit_exceeded`; no output was produced. A direct (non-agent) diagnostic call succeeded trivially, confirming the model deployment itself is healthy and isolating the failure to deployment capacity. |
-| Digest verification | **Verified 2026-08-13.** Live agent `definition.instructions`, recomputed, hashes to `f9020da9288314426d3481c281233442e7359a2f893608aa5fb87fc85b401f96` — matches `manifest.json` exactly. |
-| Model config ref | Not recorded — no live output exists to carry a `provenance.modelConfigRef` value. |
+| Test invocation result | **Passed 2026-08-13.** After a human-authorized capacity increase (`GlobalStandard` `1` → `10`), all 7 bounded live evaluation cases produced schema-checkable output and passed through the deterministic validator. See `docs/evidence/2026-08-13-foundry-live-evaluation.md`. |
+| Digest verification | **Verified 2026-08-13.** Live agent `definition.instructions`, recomputed, hashes to `f9020da9288314426d3481c281233442e7359a2f893608aa5fb87fc85b401f96` — matches `manifest.json` exactly, both at creation and again after the capacity change. Every live-evaluation response also echoed this digest correctly. |
+| Model config ref | **Recorded 2026-08-13.** `shift-closeout-agent-config-v1`, echoed correctly by the model in every live-evaluation response as a runtime-supplied provenance constant. |
 
 ---
 
@@ -163,9 +167,12 @@ See `docs/agent/instruction-versioning.md` for the full versioning protocol.
 
 - ADR-20260812-008 — Deterministic validation runs outside the agent
 - ADR-20260812-009 — Fail-closed markers are structural constants
-- `docs/risks.md` §BLOCKER-003, §RISK-019
+- `docs/risks.md` §BLOCKER-003 (resolved), §RISK-019 (resolved)
 - `docs/evidence/2026-08-13-foundry-agent-provisioning.md`
+- `docs/evidence/2026-08-13-foundry-live-evaluation.md`
 - `agent/instructions/shift-closeout/v1.0.0/manifest.json`
-- `agent/deployment/create_prompt_agent.py`, `agent/deployment/invoke_agent.py`
-- `agent/evaluation/run-grounding-evaluation.mjs`
+- `agent/deployment/create_prompt_agent.py`, `agent/deployment/invoke_agent.py`,
+  `agent/deployment/verify_agent.py`, `agent/deployment/run_live_evaluation.py`
+- `agent/evaluation/run-grounding-evaluation.mjs`,
+  `agent/evaluation/validate-live-output.mjs`
 - `docs/agent/grounding-evaluation.md`
