@@ -11,16 +11,14 @@
  * run-specific identifiers (correlationId, context, artifactId, generationId,
  * timestamps) updated to match the current request.
  *
- * Live Foundry invocation requires:
- *   BLOCKER-001 (docs/risks.md) — Copilot Studio to Foundry invocation model
- *     must be verified in the target tenant before binding can be implemented.
- *   BLOCKER-003 (docs/risks.md) — Foundry external retrieval must be verified
- *     disabled before any demonstration of generated content.
+ * The target invocation path is selected by ADR-20260813-011. Issue #6
+ * separately verified the deployed Foundry agent and its live behavior.
+ * Direct Copilot Studio connected-agent validation remains NOT RUN under
+ * RISK-020, so this local journey continues to use the simulation boundary.
  *
- * When those blockers are resolved, the body of invoke() below is replaced
- * with the verified invocation path (Power Automate proxy or direct action,
- * per the human decision on BLOCKER-001). The rest of the orchestration layer
- * — validation, approval, audit — is unaffected.
+ * After the direct connection and request/response adaptation are verified,
+ * the body of invoke() below can be replaced without changing the surrounding
+ * validation, approval, or audit controls.
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * ADR-20260812-010: A deferred capability may not appear as a stub, a mock
@@ -125,4 +123,4 @@ export const IS_SIMULATION_BOUNDARY = true;
 
 /** Human-readable label shown in audit evidence when this boundary is active. */
 export const SIMULATION_BOUNDARY_LABEL =
-  'SIMULATION BOUNDARY — live Foundry invocation pending BLOCKER-001 and BLOCKER-003 resolution';
+  'SIMULATION BOUNDARY — direct Copilot Studio connected-agent validation NOT RUN (RISK-020)';

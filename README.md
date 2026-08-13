@@ -109,7 +109,7 @@ failure.
 | `npm run test:fail-closed` | Exercises every one of the twelve fail-closed codes through the orchestration layer, including the user-safe message mapping. |
 | `npm run test:governance` | Exercises validation order, the PHI scan, approval binding, audit minimality, and illustrative metric labelling. |
 | `npm run evaluate:digest` | Recomputes the agent instruction digest and asserts it matches the shipped manifest and the provenance examples. |
-| `npm run evaluate:grounding` | Runs the local grounding evaluation set. Live Foundry evaluation is blocked by BLOCKER-003 and is reported as not run. |
+| `npm run evaluate:grounding` | Runs the local grounding evaluation set. Live Foundry evaluation evidence is recorded separately under issue #6. |
 | `npm run test:unit` | Runs every test under `tests/`, including wrong-patient, malformed-output, prompt-injection, unsupported-fact, approval-bypass, secret-exposure, and the end-to-end journey test. |
 | `npm run demo` | Executes the local synthetic nurse journey, M1 to M6. |
 | `npm run verify` | Every command above in sequence. This is the integration gate. No work package is accepted without a recorded zero-exit run of this command. |
@@ -183,7 +183,7 @@ implemented** in this P0 prototype. They must not be implied as operational.
 |---|---|
 | Live EHR or production FHIR API integration | `FUTURE` |
 | Write-back to any system of record | `FUTURE` |
-| Production identity and role-claim enforcement | `FUTURE` — open BLOCKER-001, BLOCKER-002 |
+| Production identity and role-claim enforcement | `FUTURE` — open BLOCKER-002 |
 | Multiple agents or additional workflows | `FUTURE` |
 | Medication reconciliation | `FUTURE` |
 | Discharge coordination | `FUTURE` |
@@ -211,7 +211,8 @@ capabilities rule.
 | [`docs/narrative/storybrand.md`](docs/narrative/storybrand.md) | StoryBrand frame governing all demonstration narrative |
 | [`docs/demo/demonstration-script.md`](docs/demo/demonstration-script.md) | What appears on screen and what is said at each step |
 | [`docs/demo/talk-track.md`](docs/demo/talk-track.md) | Spoken words for live demonstration delivery |
-| [`docs/architecture/decisions/`](docs/architecture/decisions/README.md) | Ten accepted ADRs |
+| [`docs/architecture/decisions/`](docs/architecture/decisions/README.md) | Eleven accepted ADRs |
+| [`docs/architecture/copilot-studio-foundry-direct-connection.md`](docs/architecture/copilot-studio-foundry-direct-connection.md) | Direct connected-agent architecture and validation boundary |
 | [`docs/risks.md`](docs/risks.md) | Open blockers requiring human decisions and the risk register |
 | [`docs/evidence/2026-08-12-integration-run.md`](docs/evidence/2026-08-12-integration-run.md) | Every validation command and its actual output from the integration run |
 | [`docs/assumptions.md`](docs/assumptions.md) | Verified-or-open assumptions the baseline depends on |
@@ -232,25 +233,29 @@ human project owner.
 
 ---
 
-## Compliance with open blockers
+## Platform decision and remaining blockers
 
-Three open blockers require a human decision before a fully operational
-demonstration can be delivered:
+The direct target binding is selected, but the local demonstration remains
+honest about which platform steps have run:
 
-- **BLOCKER-001** — The Copilot Studio to Foundry invocation model is
-  unverified in the target environment. See `docs/risks.md`.
+- **BLOCKER-001** — Resolved by ADR-20260813-011: use Copilot Studio's preview
+  direct Microsoft Foundry connected-agent path. Power Automate is not the
+  target intermediary.
 - **BLOCKER-002** — Role-claim authorization in Copilot Studio is unverified
   in the target tenant. See `docs/risks.md`.
-- **BLOCKER-003** — Foundry external retrieval must be verified as disabled
-  before any demonstration of generated content. See `docs/risks.md`.
+- **BLOCKER-003** — Resolved by issue #6: the isolated Foundry agent was
+  verified with zero tools and passed the bounded live evaluation suite.
+- **RISK-020** — Direct Copilot Studio connected-agent validation, including
+  request/response contract adaptation, is **NOT RUN**.
 
 Contracts, synthetic data, governance utilities, orchestration, presentation,
 narrative, and this documentation are unblocked and complete for the local
 synthetic slice. The generation step in `npm run demo` runs through a documented
 simulation boundary in `src/orchestration/foundry-adapter.mjs`, which returns a
 contract-valid draft for the synthetic dataset. No live Foundry agent is called,
-no live Copilot Studio topic is bound, and no live evaluation has been run.
-Demonstrations of live generated content remain gated on BLOCKER-003.
+and no live Copilot Studio topic is bound. The separate live Foundry agent
+evaluation under issue #6 does not validate the direct Copilot Studio
+connection.
 
 ---
 

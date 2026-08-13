@@ -167,10 +167,10 @@ node agent/evaluation/check-instruction-digest.mjs
 | | |
 |---|---|
 | Owner | Tank |
-| Depends on | WP-00, WP-01; binding depends on BLOCKER-001 and BLOCKER-002 |
+| Depends on | WP-00, WP-01; live binding depends on BLOCKER-002 and RISK-020 validation |
 | Requirements | REQ-WF-001 to 007, REQ-SCOPE-001, REQ-SCOPE-004, REQ-SAFE-004, REQ-AUD-001, REQ-AUD-004 |
 | Target files | `workflow/copilot-studio/shift-closeout-topic.md`, `workflow/copilot-studio/*.yaml`, `src/orchestration/**`, `docs/workflow/fail-closed-catalog.md`, `docs/workflow/experience-flow.md` |
-| Status | **Complete locally, binding blocked** — orchestration runs end to end against the synthetic dataset; the Copilot Studio binding and role-claim authorization remain blocked by BLOCKER-001 and BLOCKER-002 |
+| Status | **Complete locally; target path decided; direct validation NOT RUN** — orchestration runs end to end against the synthetic dataset. ADR-20260813-011 resolves BLOCKER-001 with the direct Foundry connected-agent path. Target-tenant request/response adaptation remains untested under RISK-020, and role-claim authorization remains blocked by BLOCKER-002. |
 
 **Scope.** The single shift-closeout experience: authenticated request, patient
 and encounter confirmation, draft presentation, source-reference inspection,
@@ -201,32 +201,33 @@ node src/orchestration/test/run-fail-closed-catalog.mjs
 node scripts/validate-docs.mjs
 ```
 
-**Blocked sub-tasks.** Direct invocation binding and role-claim authorization
-wait on BLOCKER-001 and BLOCKER-002 in `docs/risks.md`. All other sub-tasks
-proceed.
+**Outstanding sub-tasks.** Direct connected-agent validation is **NOT RUN**
+under RISK-020. Role-claim authorization waits on BLOCKER-002 in
+`docs/risks.md`. All other sub-tasks proceed.
 
 ### WP-05 — Foundry agent deployment and binding
 
 | | |
 |---|---|
 | Owner | Neo |
-| Depends on | WP-03, WP-04; gated by BLOCKER-003 |
+| Depends on | WP-03, WP-04; BLOCKER-003 resolved |
 | Requirements | REQ-SCOPE-002, REQ-AGT-001, REQ-AGT-005, REQ-SAFE-002 |
-| Target files | `agent/evaluation/**`, `docs/agent/deployment.md`, `docs/agent/grounding-evaluation.md` |
-| Status | **Blocked** — the evaluation harness and local grounding evaluation are complete; deployment, live invocation, and the external-retrieval configuration evidence wait on BLOCKER-003. Generation in the local slice runs through the documented simulation boundary in `src/orchestration/foundry-adapter.mjs`. |
+| Target files | `agent/evaluation/**`, `agent/deployment/**`, `docs/agent/deployment.md`, `docs/agent/grounding-evaluation.md` |
+| Status | **Complete for Foundry-agent deployment and live evaluation.** Issue #6 provisioned the isolated `shift-closeout-agent`, verified zero tools and the instruction digest, and completed the bounded live suite with 7/7 passing after a human-authorized capacity increase. See `docs/evidence/2026-08-13-foundry-agent-provisioning.md` and `docs/evidence/2026-08-13-foundry-live-evaluation.md`. This does not constitute direct Copilot Studio connected-agent validation; the local slice still uses `src/orchestration/foundry-adapter.mjs`. |
 
 **Acceptance criteria.**
 - Deployment configuration evidence shows external retrieval and knowledge
-  augmentation disabled, satisfying BLOCKER-003. No demonstration of generated
-  content occurs before this evidence exists.
+  augmentation disabled, satisfying BLOCKER-003. — **Met 2026-08-13**.
 - The agent accepts an input validating against the input contract and returns
-  output validating against the output contract.
+  output validating against the output contract. — **Met live 2026-08-13**.
 - Provenance carries the correlation identifier unchanged plus the instruction
-  version and digest from WP-03.
+  version and digest from WP-03. — **Met live 2026-08-13**.
 - An evaluation set over the WP-01 dataset shows complete grounding, and a
-  deliberately unsupported request is refused with `E-GROUNDING-FAILURE`.
+  deliberately unsupported request is refused with `E-GROUNDING-FAILURE`. —
+  **Met locally and live 2026-08-13**.
 - No configuration value is committed; endpoints resolve through
-  `environmentBindings`.
+  `environmentBindings`. — Met; the project endpoint and agent ID are resolved
+  only via the local, gitignored azd environment state.
 
 **Validation.**
 ```
@@ -362,9 +363,10 @@ and `data/synthetic/bundles/SYN-BDL-PEDBDL01.json`. Full command output is in
 | M5 | Pass | All three decisions exercised; approval reconfirmed and bound to `artifactSha256`; wrong-patient reconfirmation, reasonless revision, injected revision text, an identifier in a decision reason, and a revision past `operations.maxRevisions` all refused |
 | M6 | Pass | One correlation identifier retrieved fourteen events across request, confirmation, generation, presentation, decision, and revision; no event carried narrative content; every non-success outcome named its code; the illustrative view rendered with `ILLUSTRATIVE` on every figure |
 
-Generation ran through the documented simulation boundary. Live Copilot Studio
-binding (BLOCKER-001, BLOCKER-002) and live Foundry evaluation (BLOCKER-003)
-were not run and are not claimed.
+Generation ran through the documented simulation boundary in this 2026-08-12
+record. Subsequent issue #6 evidence completed the live Foundry agent evaluation.
+The direct Copilot Studio connected-agent binding remains **NOT RUN** under
+RISK-020, and BLOCKER-002 remains open.
 
 ## Dependency order
 
@@ -398,7 +400,7 @@ Run from the repository root.
 | `npm run test:fail-closed` | Exercise every fail-closed code end to end in the orchestration layer |
 | `npm run test:governance` | Exercise validation order, PHI scan, approval binding, audit minimality, and metric labelling |
 | `npm run evaluate:digest` | Assert the shipped instruction digest matches the instruction content |
-| `npm run evaluate:grounding` | Run the local grounding evaluation set; live Foundry evaluation stays blocked by BLOCKER-003 |
+| `npm run evaluate:grounding` | Run the local grounding evaluation set; live Foundry evidence is recorded separately under issue #6 |
 | `npm run test:unit` | Run every test under `tests/`, including the wrong-patient, malformed-output, prompt-injection, unsupported-fact, approval-bypass, secret-exposure, and end-to-end journey tests |
 | `npm run demo` | Execute the complete local synthetic nurse journey, M1 to M6, and print the draft, source references, decisions, correlated evidence, and illustrative view |
 | `npm run verify` | Every command above in sequence; the gate for integration |
@@ -407,8 +409,8 @@ Run from the repository root.
 
 1. **After WP-01, WP-02, WP-03, WP-06.** Trinity runs `npm run validate`, reviews
    contract conformance, and updates risk status. No demonstration yet.
-2. **After WP-04 and WP-05.** Trinity confirms BLOCKER-001 to BLOCKER-003 are
-   resolved or explicitly accepted, and exercises M1 to M4.
+2. **After WP-04 and WP-05.** Trinity confirms BLOCKER-001 and BLOCKER-003 are
+   resolved, records BLOCKER-002 and RISK-020 explicitly, and exercises M1 to M4.
 3. **After WP-07 and WP-08.** Trinity exercises M5 and M6 and records the
    milestone acceptance.
 

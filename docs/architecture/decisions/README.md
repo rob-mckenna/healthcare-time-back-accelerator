@@ -4,9 +4,9 @@ Durable architecture decisions for the Second Shift accelerator, in the format
 defined by `SQUAD_BOOTSTRAP.md` section 9. Concise shared memory lives in
 `.squad/decisions.md`; these records carry the reasoning.
 
-All records below were accepted at the Design Review on 2026-08-12 with
-participants Switch, Tank, Neo, and Morpheus, integrated and owned by Trinity.
-They are the hard dependency for P0 implementation.
+The baseline records were accepted at the Design Review on 2026-08-12 with
+participants Switch, Tank, Neo, and Morpheus. Later records name their own
+decision date and evidence. Trinity integrates and owns the ADR set.
 
 | ID | Title | Status | Owner | Primary requirement IDs |
 |---|---|---|---|---|
@@ -20,6 +20,7 @@ They are the hard dependency for P0 implementation.
 | [ADR-20260812-008](ADR-20260812-008.md) | Deterministic validation runs outside the agent | Accepted | Trinity | REQ-SAFE-005, REQ-AGT-002 |
 | [ADR-20260812-009](ADR-20260812-009.md) | Fail-closed markers are structural constants | Accepted | Trinity | REQ-SAFE-005, REQ-AUD-003 |
 | [ADR-20260812-010](ADR-20260812-010.md) | Deferred capabilities appear only as FUTURE | Accepted | Trinity | REQ-SCOPE-008, REQ-SAFE-006 |
+| [ADR-20260813-011](ADR-20260813-011.md) | Use the direct Copilot Studio connected-agent path | Accepted | Trinity | REQ-SCOPE-001, REQ-SCOPE-002, REQ-WF-003, REQ-SAFE-006 |
 
 ## Raising a new decision
 

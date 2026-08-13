@@ -9,12 +9,12 @@
 > **SIMULATION BOUNDARY NOTICE**
 >
 > This document specifies the Copilot Studio topic for the shift-closeout experience.
-> **BLOCKER-001 invocation model is decided** (issue #4): Copilot Studio's preview
+> **BLOCKER-001 invocation model is resolved** (issue #4): Copilot Studio's preview
 > **Agents → Add an agent → Connect to an external agent → Microsoft Foundry** path,
 > using a new-portal Foundry project endpoint and Agent Id. This supersedes the
 > Power Automate proxy option previously recorded for BLOCKER-001. See
 > `docs/workflow/copilot-studio-foundry-direct-connection.md` for the full
-> specification, official citation, input/output mapping, and exception paths.
+> specification, official citation, adaptation boundary, and exception paths.
 >
 > **BLOCKER-002** (role claim availability unverified) remains open and is tracked by
 > issue #5. The Microsoft Foundry connector documentation does not describe end-user
@@ -22,9 +22,9 @@
 > Foundry connection supplies identity or authorization. Every invocation is gated by
 > the explicit, validated requester context this topic builds independently (Step 1).
 >
-> Live connectivity status: **NOT RUN — pending #6 project/Agent ID and tenant
-> verification.** Per ADR-20260812-010, this document specifies configuration; it
-> does not assert that a connection has been created, tested, or verified in any
+> Issue #6 is resolved and supplies the new-portal Foundry agent. Direct
+> Copilot Studio connected-agent validation is still **NOT RUN**: no Copilot
+> Studio connection or request/response adaptation has been tested in a target
 > tenant.
 
 ---
@@ -68,8 +68,8 @@ acceptance criteria (`docs/plan/p0-execution-plan.md`).
 
 **Fail closed:** Any gap in steps 1–6 emits `E-IDENTITY-MISSING` and ends the topic.
 The connected-agent action node in Step 3 must be structurally unreachable unless
-steps 1–6 have completed successfully — the Foundry connection provides no
-authorization check of its own.
+steps 1–6 have completed successfully. The cited documentation does not establish
+an authorization check for this accelerator's requester context.
 
 ### Step 2 — Patient and encounter confirmation (M2)
 
@@ -88,14 +88,15 @@ authorization check of its own.
 
 1. Show a progress indicator: "{shiftLabel} draft is being prepared…"
 2. Assemble the agent input payload per `contracts/schemas/shift-closeout-agent-input.schema.json`.
-3. Invoke the Shift Closeout Agent through the connected-agent action created via
+3. Invoke the Shift Closeout Agent through a connected-agent action created via
    **Agents → Add an agent → Connect to an external agent → Microsoft Foundry**
    (preview, standard harness), addressed by the configured Foundry project
    endpoint connection and Agent Id. See
-   `docs/workflow/copilot-studio-foundry-direct-connection.md` §4–§8 for the full
-   setup sequence and the input/output mapping onto this same agent input/output
-   contract. This step is specified only; live invocation is
-   **NOT RUN — pending #6**.
+   `docs/workflow/copilot-studio-foundry-direct-connection.md` for the supported
+   setup sequence and the accelerator's adaptation requirements. The cited
+   Microsoft documentation does not define transport for this repository's JSON
+   contracts. The exact request/response adaptation must be authored and
+   validated in the target tenant. This direct invocation is **NOT RUN**.
 4. On timeout (`E-AGENT-TIMEOUT`): surface the configured message. End the topic.
 5. On agent error (`E-AGENT-ERROR`) — including a missing/removed Foundry
    connection or an unresolvable Agent Id: surface the configured message. End
@@ -206,7 +207,7 @@ If any of these elements cannot be rendered, the surface must not render the dra
 
 | Sub-task | Blocker | Status |
 |---|---|---|
-| Copilot Studio-to-Foundry invocation model decision | BLOCKER-001 | **Decided** (issue #4) — direct Foundry connected-agent path. Specification complete; live binding **NOT RUN — pending #6** project/Agent ID and tenant verification. |
+| Copilot Studio-to-Foundry invocation model decision | BLOCKER-001 | **Resolved** (issue #4, ADR-20260813-011) — direct Foundry connected-agent path. Issue #6 supplied and validated the Foundry agent; direct Copilot Studio binding and contract adaptation remain **NOT RUN** under RISK-020. |
 | Role claim resolution from directory | BLOCKER-002 | Blocked — pending human decision, tracked by issue #5. Not satisfied by the Foundry connection; resolved entirely inside the topic. |
 
 All other sub-tasks — fail-closed logic, validation, approval capture, audit events,
@@ -221,9 +222,10 @@ specification.
 
 ## 6. Connected-agent exception paths
 
-These extend the Step 3 fail-closed conditions with cases specific to the Foundry
-connected-agent invocation model. Full detail, including trigger conditions, is in
-`docs/workflow/copilot-studio-foundry-direct-connection.md` §10.
+These are accelerator handling requirements for conditions observed around the
+Foundry connected-agent invocation. They do not claim that the connector exposes
+these exact native error categories. Full detail is in
+`docs/workflow/copilot-studio-foundry-direct-connection.md`.
 
 | Exception | Mapped code |
 |---|---|
@@ -235,4 +237,3 @@ connected-agent invocation model. Full detail, including trigger conditions, is 
 
 No new fail-closed code is introduced by the connected-agent binding; every condition maps to
 an existing entry in `contracts/schemas/common/definitions.schema.json#/$defs/failClosedCode`.
-

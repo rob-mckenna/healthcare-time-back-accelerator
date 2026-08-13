@@ -3,14 +3,15 @@
 # This file specifies the shift-closeout topic flow in structured YAML.
 # It is a DESIGN SPECIFICATION, not a deployable Copilot Studio authoring file.
 #
-# BLOCKER-001 (docs/risks.md) — invocation model DECIDED (issue #4): the preview
+# BLOCKER-001 (docs/risks.md) — invocation model RESOLVED (issue #4): the preview
 #   Copilot Studio "Agents -> Add an agent -> Connect to an external agent ->
 #   Microsoft Foundry" path, using a new-portal Foundry project endpoint
 #   connection and Agent Id. Supersedes the Power Automate proxy option
-#   previously recorded for BLOCKER-001. Full specification, official citation,
-#   and input/output mapping: docs/workflow/copilot-studio-foundry-direct-connection.md
-#   Live connectivity status: NOT RUN — pending #6 project/Agent ID and tenant
-#   verification.
+#   previously recorded for BLOCKER-001. Full specification and official citation:
+#   docs/workflow/copilot-studio-foundry-direct-connection.md
+#   Issue #6 supplied and evaluated the Foundry agent. Direct Copilot Studio
+#   connected-agent validation remains NOT RUN; no target-tenant connection or
+#   request/response adaptation has been tested.
 # BLOCKER-002 (docs/risks.md) — role claim availability must still be verified,
 #   tracked by issue #5. The Foundry connector documentation does not describe
 #   end-user Entra identity or role-claim propagation. This topic never assumes
@@ -21,7 +22,7 @@
 # for unverified product behavior. The node marked [BLOCKED-002] requires the
 # corresponding human decision before it can be implemented. The invokeFoundryAgent
 # node below is now specified per the decided connected-agent path, but is marked
-# [NOT RUN] because no live connection, project, or Agent Id has been verified.
+# [NOT RUN] because no live Copilot Studio connection has been verified.
 #
 # REQ IDs: REQ-WF-001 through REQ-WF-007, REQ-SCOPE-001, REQ-SCOPE-004
 
@@ -146,15 +147,14 @@ topic:
     - id: invokeFoundryAgent
       kind: action
       label: "Invoke Shift Closeout Agent (connected Foundry agent, preview)"
-      # [NOT RUN] BLOCKER-001 invocation model is DECIDED (issue #4): the preview
+      # [NOT RUN] BLOCKER-001 invocation model is RESOLVED (issue #4): the preview
       # Copilot Studio "Agents -> Add an agent -> Connect to an external agent ->
       # Microsoft Foundry" path. Superseded option: Power Automate proxy flow
-      # (no longer the selected path). This node is specified per the decided
-      # binding but is NOT RUN until issue #6 provisions the Foundry project and
-      # Agent Id and a tenant is available for verification. See
-      # docs/workflow/copilot-studio-foundry-direct-connection.md for the full
-      # setup sequence, input/output mapping, and citation to the official
-      # Microsoft Learn page.
+      # (no longer the selected path). Issue #6 supplied and evaluated the
+      # Foundry agent. This node remains NOT RUN until the direct connection and
+      # request/response adaptation are tested in a Copilot Studio tenant. The
+      # official source documents adding the connected agent; it does not define
+      # transport for this repository's JSON contracts.
       binding: "Connected agent — Microsoft Foundry (preview, standard harness)"
       connection:
         projectEndpoint: "{{FOUNDRY_PROJECT_ENDPOINT}}"   # environment value, never committed
@@ -169,7 +169,13 @@ topic:
         The connected-agent documentation does not describe end-user Entra
         identity or role-claim propagation. This node is unreachable unless
         the authenticate and resolveRole nodes above have already produced a
-        validated actorRef/roleCode — the connection supplies none of that.
+        validated actorRef/roleCode. The connection is not treated as supplying
+        requester authorization because the cited documentation does not define it.
+      contractAdaptationNote: >
+        Accelerator requirement, not connector-documented behavior: adapt the
+        validated repository input to the observed invocation shape and adapt
+        returned content to the repository output contract before deterministic
+        validation. Fail closed if the contract cannot be preserved.
       timeout: "{operations.agentTimeoutMs} ms"
       onMissingConnection:
         failClosedCode: E-AGENT-ERROR
