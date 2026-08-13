@@ -62,7 +62,8 @@ Each milestone has a defined acceptance condition in
    - Synthetic patient identifier (`SYN-PAT-` prefix)
    - Synthetic encounter identifier (`SYN-ENC-` prefix)
    - Synthetic data notice from `safetyCopy.syntheticDataNotice`
-2. The nurse confirms. `preGenerationConfirmedAt` and `confirmedByRef` are recorded.
+2. The nurse confirms. `preGenerationConfirmedAt` and `confirmedByRef` are
+   recorded from the same authenticated human `USR-*` actor.
 3. An audit event of type `context-confirmation` with outcome `success` is emitted.
 
 **Fail-closed conditions:**
@@ -72,8 +73,10 @@ Each milestone has a defined acceptance condition in
 | Confirmation absent or invalid | `E-CONTEXT-UNCONFIRMED` |
 | Identifiers missing or malformed | `E-CONTEXT-UNCONFIRMED` |
 | Nurse declines or skips | `E-CONTEXT-UNCONFIRMED` |
+| Confirmation is stale or `confirmedByRef` differs from requester | `E-CONTEXT-UNCONFIRMED` |
+| Sensitive identity key appears in the handoff | `E-IDENTITY-MISSING` |
 
-**Implementation:** `src/orchestration/context-guard.mjs#assertPreGenerationConfirmed`
+**Implementation:** `src/governance/assert-authorized-requester.mjs#assertPreGenerationHandoff`
 
 ---
 
@@ -142,13 +145,16 @@ The draft is refused rather than shown with an unsupported statement.
 **What happens — Approve:**
 
 1. The system re-presents the patient and encounter for explicit reconfirmation.
-2. `preApprovalConfirmedAt` is recorded.
+2. `preApprovalConfirmedAt` and `reconfirmedByRef` are recorded from the
+   current authenticated human `USR-*` actor.
 3. Patient and encounter identifiers are verified against the generation-gate values
    (`context-reconfirmation-match` rule).
-4. An approval event is assembled per `contracts/schemas/approval-event.schema.json`,
+4. The reconfirmation must be fresh and `reconfirmedByRef` must equal the
+   approver. Agent and system actor references are refused.
+5. An approval event is assembled per `contracts/schemas/approval-event.schema.json`,
    bound to `artifactSha256`.
-5. `lifecycleStatus` moves from `DRAFT` to `APPROVED-SIMULATED`.
-6. The nurse sees: "APPROVED — SIMULATED FINALIZATION ONLY" and the notice
+6. `lifecycleStatus` moves from `DRAFT` to `APPROVED-SIMULATED`.
+7. The nurse sees: "APPROVED — SIMULATED FINALIZATION ONLY" and the notice
    that no record has been written to any system of record.
 
 **What happens — Reject:**
@@ -170,11 +176,13 @@ The draft is refused rather than shown with an unsupported statement.
 | Condition | Code |
 |---|---|
 | preApprovalConfirmedAt absent | `E-APPROVAL-WITHOUT-CONFIRMATION` |
+| Reconfirmation stale, missing reconfirmer, or wrong reconfirmer | `E-APPROVAL-WITHOUT-CONFIRMATION` |
+| Approver is not a human `USR-*` actor | `E-IDENTITY-MISSING` |
 | Patient or encounter mismatch | `E-APPROVAL-WITHOUT-CONFIRMATION` |
 | Reason absent for reject/revise | `E-APPROVAL-WITHOUT-CONFIRMATION` |
 | Revision limit reached | `E-REVISION-LIMIT-REACHED` |
 
-**Implementation:** `src/orchestration/context-guard.mjs#assertPreApprovalConfirmed`,
+**Implementation:** `src/governance/assert-authorized-requester.mjs#assertPreApprovalHandoff`,
 `src/orchestration/approval-orchestrator.mjs#recordDecision`
 
 ---

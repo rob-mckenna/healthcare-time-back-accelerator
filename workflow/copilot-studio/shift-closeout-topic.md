@@ -80,9 +80,12 @@ an authorization check for this accelerator's requester context.
 2. Ask: "Is this the correct patient and encounter for your shift closeout?"
 3. If the user declines or is unsure: surface `errorMessageOverrides["E-CONTEXT-UNCONFIRMED"]`.
    Offer a restart. End the topic if not restarted.
-4. On confirmation: record `preGenerationConfirmedAt` (UTC ISO-8601), `confirmedByRef`.
+4. On confirmation: record `preGenerationConfirmedAt` (UTC ISO-8601) and
+   `confirmedByRef` from the same authorized human `USR-*` requester.
 
-**Fail closed:** Generation does not begin without a recorded `preGenerationConfirmedAt`.
+**Fail closed:** Generation does not begin unless the confirmation is fresh
+(`operations.maxContextAgeMs`), `confirmedByRef` matches the requester, and
+the envelope contains no sensitive identity keys.
 
 ### Step 3 — Draft generation (M3)
 
@@ -138,12 +141,15 @@ Present three clearly labeled controls:
 
 **Approve path:**
 1. Present the patient and encounter again for explicit reconfirmation.
-2. Record `preApprovalConfirmedAt`. If absent: `E-APPROVAL-WITHOUT-CONFIRMATION`.
+2. Record `preApprovalConfirmedAt` and `reconfirmedByRef` from the current
+   authenticated human. If either is absent: `E-APPROVAL-WITHOUT-CONFIRMATION`.
 3. Verify patient and encounter match the generation-gate values. If mismatch:
    `E-APPROVAL-WITHOUT-CONFIRMATION`.
-4. Record the approval event per `contracts/schemas/approval-event.schema.json`.
-5. Display `statusLabel: "APPROVED — SIMULATED FINALIZATION ONLY"`.
-6. Display: "No record has been written to any system of record. This is a
+4. Verify the reconfirmation is fresh and `reconfirmedByRef` equals the
+   approver's `USR-*` actor reference. `AGT-*` and `SYS-*` cannot decide.
+5. Record the approval event per `contracts/schemas/approval-event.schema.json`.
+6. Display `statusLabel: "APPROVED — SIMULATED FINALIZATION ONLY"`.
+7. Display: "No record has been written to any system of record. This is a
    simulated prototype approval event."
 
 **Reject path:**
@@ -158,8 +164,9 @@ Present three clearly labeled controls:
 3. Scan revision instructions — see `revisionInstructionsSanitized`.
 4. Return to step 3 (generation) with the revision request appended to the input.
 
-**Fail closed on every path:** No decision is recorded without `preApprovalConfirmedAt`
-and a matching patient/encounter context.
+**Fail closed on every path:** No decision is recorded without a fresh
+`preApprovalConfirmedAt`, a matching `reconfirmedByRef`, and matching
+patient/encounter context.
 
 ### Step 6 — Correlated evidence view (M6)
 

@@ -41,6 +41,7 @@
   },
   "operations": {
     "maxRevisions": 3,
+    "maxContextAgeMs": 900000,
     "agentTimeoutMs": 60000,
     "inputContractVersion": "1.0.0",
     "outputContractVersion": "1.0.0",

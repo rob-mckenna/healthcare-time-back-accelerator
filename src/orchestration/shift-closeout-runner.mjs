@@ -22,7 +22,10 @@
 import { mintCorrelationId, shortReference, isValidCorrelationId } from './correlation.mjs';
 import { loadOrgConfig, resolveUserSafeMessage } from './config-loader.mjs';
 import { assertIdentity } from './identity-guard.mjs';
-import { assertPreGenerationConfirmed } from './context-guard.mjs';
+import {
+  assertNoIdentityPropagation,
+  assertPreGenerationHandoff,
+} from '../governance/assert-authorized-requester.mjs';
 import { buildInput } from './input-builder.mjs';
 import { invoke as invokeFoundry, IS_SIMULATION_BOUNDARY, SIMULATION_BOUNDARY_LABEL } from './foundry-adapter.mjs';
 import { validateOutput } from './output-validator.mjs';
@@ -135,7 +138,8 @@ export async function requestDraft(params) {
 
   // 4. Assert pre-generation context confirmation — E-CONTEXT-UNCONFIRMED
   try {
-    assertPreGenerationConfirmed(context);
+    const handoff = assertPreGenerationHandoff({ requester, context, orgConfig });
+    if (!handoff.ok) throw failClosed(handoff.failClosedCode, handoff.error);
   } catch (err) {
     if (isFailClosed(err)) {
       await _tryEmitFailAudit({
@@ -194,6 +198,25 @@ export async function requestDraft(params) {
       return _failResult(err.failClosedCode, err, correlationId, orgConfig);
     }
     throw err;
+  }
+
+  const boundaryCheck = assertNoIdentityPropagation(agentInput);
+  if (!boundaryCheck.ok) {
+    const err = failClosed(boundaryCheck.failClosedCode, boundaryCheck.error);
+    await _tryEmitFailAudit({
+      eventType: 'request',
+      correlationId,
+      organizationId,
+      actorRef: requester.actorRef,
+      actorType: 'human',
+      actorRoleCode: requester.roleCode,
+      outcome: 'blocked',
+      failClosedCode: err.failClosedCode,
+      outcomeDetail: 'Agent input carried a disallowed identity field',
+      syntheticPatientId: context.syntheticPatientId,
+      syntheticEncounterId: context.syntheticEncounterId,
+    });
+    return _failResult(err.failClosedCode, err, correlationId, orgConfig);
   }
 
   // 6. Invoke the Foundry adapter — E-AGENT-TIMEOUT | E-AGENT-ERROR
@@ -301,6 +324,7 @@ export async function requestDraft(params) {
  * @param {object} params.draft — the artifact from requestDraft()
  * @param {string} params.correlationId — from the DraftResult
  * @param {object} params.reconfirmedContext — pre-approval reconfirmation
+ * @param {string} params.reconfirmedByRef — human actor who performed the reconfirmation
  * @param {object} params.originalContext — pre-generation context
  * @param {'approved'|'rejected'|'revision-requested'} params.decision
  * @param {string} [params.decisionReason]
@@ -310,7 +334,7 @@ export async function requestDraft(params) {
 export async function recordDecision(params) {
   const {
     organizationId, approver, draft, correlationId,
-    reconfirmedContext, originalContext, decision, decisionReason,
+    reconfirmedContext, reconfirmedByRef, originalContext, decision, decisionReason,
     revisionCount = 0,
   } = params;
 
@@ -348,7 +372,7 @@ export async function recordDecision(params) {
   try {
     approvalEvent = await captureDecision({
       correlationId, organizationId, approver, artifact: draft,
-      reconfirmedContext, originalContext,
+      reconfirmedContext, reconfirmedByRef, originalContext,
       decision, decisionReason,
       revisionNumber: revisionCount,
       orgConfig,

@@ -49,7 +49,8 @@
     "outcomeDetail": {
       "type": "string",
       "maxLength": 200,
-      "description": "Short structured detail such as a failing field path. Scanned before it is written. Never a narrative, a value, or a payload."
+      "pattern": "^AUDIT-REASON-[A-Z0-9-]+$",
+      "description": "Deterministic allow-listed reason code. Caller-provided narrative, values, field paths, and payload content are replaced with AUDIT-REASON-REDACTED."
     },
     "syntheticPatientId": { "$ref": "common/definitions.schema.json#/$defs/syntheticPatientId" },
     "syntheticEncounterId": { "$ref": "common/definitions.schema.json#/$defs/syntheticEncounterId" },

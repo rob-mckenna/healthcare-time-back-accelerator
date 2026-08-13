@@ -216,7 +216,7 @@ async function main() {
   // 5a — request a revision, then regenerate inside the same correlated run
   const revisionDecision = await recordDecision({
     organizationId: ORG_ID, approver: NURSE, draft, correlationId: run1.correlationId,
-    reconfirmedContext: reconfirm(), originalContext: context,
+    reconfirmedContext: reconfirm(), reconfirmedByRef: NURSE.actorRef, originalContext: context,
     decision: 'revision-requested',
     decisionReason: 'Please restate the open items in the order they were documented.',
     revisionCount: 0,
@@ -227,7 +227,7 @@ async function main() {
 
   const missingReason = await recordDecision({
     organizationId: ORG_ID, approver: NURSE, draft, correlationId: run1.correlationId,
-    reconfirmedContext: reconfirm(), originalContext: context,
+    reconfirmedContext: reconfirm(), reconfirmedByRef: NURSE.actorRef, originalContext: context,
     decision: 'revision-requested', revisionCount: 0,
   });
   step('M5', 'revision without a reason refused',
@@ -264,7 +264,7 @@ async function main() {
 
   const overLimit = await recordDecision({
     organizationId: ORG_ID, approver: NURSE, draft: run2.draft, correlationId: run1.correlationId,
-    reconfirmedContext: reconfirm(), originalContext: context,
+    reconfirmedContext: reconfirm(), reconfirmedByRef: NURSE.actorRef, originalContext: context,
     decision: 'revision-requested', decisionReason: 'One more pass please.',
     revisionCount: orgConfig.operations.maxRevisions,
   });
@@ -276,7 +276,7 @@ async function main() {
   const wrongPatient = await recordDecision({
     organizationId: ORG_ID, approver: NURSE, draft: run2.draft, correlationId: run1.correlationId,
     reconfirmedContext: { ...reconfirm(), syntheticPatientId: 'SYN-PAT-OTHER001' },
-    originalContext: context, decision: 'approved', revisionCount: 1,
+    reconfirmedByRef: NURSE.actorRef, originalContext: context, decision: 'approved', revisionCount: 1,
   });
   step('M5', 'approval for a different patient refused',
     wrongPatient.ok === false && wrongPatient.failClosedCode === 'E-APPROVAL-WITHOUT-CONFIRMATION',
@@ -284,7 +284,7 @@ async function main() {
 
   const approved = await recordDecision({
     organizationId: ORG_ID, approver: NURSE, draft: run2.draft, correlationId: run1.correlationId,
-    reconfirmedContext: reconfirm(), originalContext: context,
+    reconfirmedContext: reconfirm(), reconfirmedByRef: NURSE.actorRef, originalContext: context,
     decision: 'approved', revisionCount: 1,
   });
   step('M5', 'approval recorded after reconfirmation',
@@ -313,7 +313,7 @@ async function main() {
   });
   const rejected = await recordDecision({
     organizationId: ORG_ID, approver: NURSE, draft: run3.draft, correlationId: run3.correlationId,
-    reconfirmedContext: reconfirm(), originalContext: context,
+    reconfirmedContext: reconfirm(), reconfirmedByRef: NURSE.actorRef, originalContext: context,
     decision: 'rejected',
     decisionReason: 'The handoff section does not reflect the documented shift period.',
   });
@@ -327,7 +327,7 @@ async function main() {
   // is committed to disk; the scanner still sees the complete string at run time.
   const identifiableReason = await recordDecision({
     organizationId: ORG_ID, approver: NURSE, draft: run3.draft, correlationId: run3.correlationId,
-    reconfirmedContext: reconfirm(), originalContext: context,
+    reconfirmedContext: reconfirm(), reconfirmedByRef: NURSE.actorRef, originalContext: context,
     decision: 'rejected',
     decisionReason: `Call the parent on ${['555', '014', '2233'].join('-')} to confirm before re-drafting.`,
   });
