@@ -1,0 +1,20 @@
+{
+  "$comment": "Synthetic fixture. Positive baseline for the pre-approval handoff gate in src/governance/assert-authorized-requester.mjs.",
+  "synthetic": true,
+  "approver": {
+    "actorRef": "USR-RN0000000001",
+    "roleCode": "registered-nurse",
+    "authenticated": true
+  },
+  "originalContext": {
+    "syntheticPatientId": "SYN-PAT-PED0001A",
+    "syntheticEncounterId": "SYN-ENC-PEDENC001"
+  },
+  "reconfirmedContext": {
+    "syntheticPatientId": "SYN-PAT-PED0001A",
+    "syntheticEncounterId": "SYN-ENC-PEDENC001",
+    "preApprovalConfirmedAt": "2026-08-13T06:52:00Z"
+  },
+  "reconfirmedByRef": "USR-RN0000000001",
+  "nowIso": "2026-08-13T06:53:00Z"
+}
