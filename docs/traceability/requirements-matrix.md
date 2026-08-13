@@ -17,7 +17,7 @@ Microsoft platform binding is marked verified.
 
 | ID | Requirement | Charter source | Owner | Contract or artifact | Validation | Status |
 |---|---|---|---|---|---|---|
-| REQ-SCOPE-001 | One Copilot Studio care-team experience, no additional workflows | §3 | Tank | `docs/plan/p0-execution-plan.md` WP-04 | `npm run demo` exercises the single workflow locally | Verified locally; Copilot Studio binding blocked by BLOCKER-001 |
+| REQ-SCOPE-001 | One Copilot Studio care-team experience, no additional workflows | §3 | Tank | `docs/plan/p0-execution-plan.md` WP-04; ADR-20260813-011 | `npm run demo` exercises the single workflow locally | Verified locally; direct connected-agent path selected; target-tenant binding and contract adaptation **NOT RUN** under RISK-020 |
 | REQ-SCOPE-002 | One Microsoft Foundry Shift Closeout Agent | §3 | Neo | `contracts/schemas/shift-closeout-agent-input.schema.json`, `contracts/schemas/shift-closeout-agent-output.schema.json` | `npm run validate:contracts` | Verified; exactly one Prompt Agent provisioned (no tools) 2026-08-13, and live behavioral verification passed 7/7 2026-08-13 after a human-authorized capacity increase — `docs/evidence/2026-08-13-foundry-agent-provisioning.md`, `docs/evidence/2026-08-13-foundry-live-evaluation.md`; BLOCKER-003 resolved |
 | REQ-SCOPE-003 | One synthetic FHIR-shaped dataset | §3, §6 | Morpheus | `contracts/schemas/synthetic-source-bundle.schema.json` | `npm run validate:contracts` | Baseline accepted |
 | REQ-SCOPE-004 | One shift-closeout workflow | §3 | Switch | `config/organizations/harborlight/organization.json` locks `primaryWorkflow` | `npm run validate:contracts` | Baseline accepted |

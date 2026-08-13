@@ -3,13 +3,26 @@
 # This file specifies the shift-closeout topic flow in structured YAML.
 # It is a DESIGN SPECIFICATION, not a deployable Copilot Studio authoring file.
 #
-# Live Copilot Studio configuration requires:
-#   BLOCKER-001 (docs/risks.md) — invocation model must be verified
-#   BLOCKER-002 (docs/risks.md) — role claim availability must be verified
+# BLOCKER-001 (docs/risks.md) — invocation model RESOLVED (issue #4): the preview
+#   Copilot Studio "Agents -> Add an agent -> Connect to an external agent ->
+#   Microsoft Foundry" path, using a new-portal Foundry project endpoint
+#   connection and Agent Id. Supersedes the Power Automate proxy option
+#   previously recorded for BLOCKER-001. Full specification and official citation:
+#   docs/workflow/copilot-studio-foundry-direct-connection.md
+#   Issue #6 supplied and evaluated the Foundry agent. Direct Copilot Studio
+#   connected-agent validation remains NOT RUN; no target-tenant connection or
+#   request/response adaptation has been tested.
+# BLOCKER-002 (docs/risks.md) — role claim availability must still be verified,
+#   tracked by issue #5. The Foundry connector documentation does not describe
+#   end-user Entra identity or role-claim propagation. This topic never assumes
+#   the Foundry connection supplies identity or authorization; every invocation
+#   is gated by the explicit, validated requester context built in this topic.
 #
 # Per ADR-20260812-010, this file does not contain working platform configuration
-# for unverified product behavior. Every node marked [BLOCKED-001] or [BLOCKED-002]
-# requires the corresponding human decision before it can be implemented.
+# for unverified product behavior. The node marked [BLOCKED-002] requires the
+# corresponding human decision before it can be implemented. The invokeFoundryAgent
+# node below is now specified per the decided connected-agent path, but is marked
+# [NOT RUN] because no live Copilot Studio connection has been verified.
 #
 # REQ IDs: REQ-WF-001 through REQ-WF-007, REQ-SCOPE-001, REQ-SCOPE-004
 
@@ -46,9 +59,13 @@ topic:
       kind: action
       label: "Resolve roleCode from authenticated session"
       # [BLOCKED-002] Whether directory role claims are available in the target
-      # tenant and in what shape is not verified. When BLOCKER-002 is resolved,
-      # this node binds to the verified claim source or proxy-flow lookup.
-      simulationBoundary: "BLOCKER-002 — role claim source pending human decision"
+      # tenant and in what shape is not verified. When BLOCKER-002 / issue #5 is
+      # resolved, this node binds to the verified claim source. The Foundry
+      # connected-agent action (invokeFoundryAgent, below) never resolves or
+      # supplies roleCode — its documentation does not describe identity or
+      # role-claim propagation, so this node must complete successfully before
+      # invokeFoundryAgent is reachable.
+      simulationBoundary: "BLOCKER-002 — role claim source pending human decision (issue #5)"
       onMissing:
         failClosedCode: E-IDENTITY-MISSING
         action: surfaceErrorMessage
@@ -129,13 +146,45 @@ topic:
 
     - id: invokeFoundryAgent
       kind: action
-      label: "Invoke Shift Closeout Agent"
-      # [BLOCKED-001] The Copilot Studio to Foundry invocation model is unverified.
-      # When BLOCKER-001 is resolved:
-      #   Option 1 (recommended): Power Automate proxy flow as the binding.
-      #   Option 2: Direct Copilot Studio action if a supported mechanism is verified.
-      simulationBoundary: "BLOCKER-001 — invocation model pending human decision"
+      label: "Invoke Shift Closeout Agent (connected Foundry agent, preview)"
+      # [NOT RUN] BLOCKER-001 invocation model is RESOLVED (issue #4): the preview
+      # Copilot Studio "Agents -> Add an agent -> Connect to an external agent ->
+      # Microsoft Foundry" path. Superseded option: Power Automate proxy flow
+      # (no longer the selected path). Issue #6 supplied and evaluated the
+      # Foundry agent. This node remains NOT RUN until the direct connection and
+      # request/response adaptation are tested in a Copilot Studio tenant. The
+      # official source documents adding the connected agent; it does not define
+      # transport for this repository's JSON contracts.
+      binding: "Connected agent — Microsoft Foundry (preview, standard harness)"
+      connection:
+        projectEndpoint: "{{FOUNDRY_PROJECT_ENDPOINT}}"   # environment value, never committed
+        agentId: "{{FOUNDRY_AGENT_ID}}"                    # environment value, never committed
+        name: "Shift Closeout Agent"
+        description: >
+          Drafts a shift-closeout summary and handoff from approved synthetic
+          source data and returns a structured, source-referenced DRAFT.
+          Performs no diagnosis, treatment, triage, or clinical recommendation.
+        newFoundryPortalRequired: true   # agents from the previous portal 404
+      identityNote: >
+        The connected-agent documentation does not describe end-user Entra
+        identity or role-claim propagation. This node is unreachable unless
+        the authenticate and resolveRole nodes above have already produced a
+        validated actorRef/roleCode. The connection is not treated as supplying
+        requester authorization because the cited documentation does not define it.
+      contractAdaptationNote: >
+        Accelerator requirement, not connector-documented behavior: adapt the
+        validated repository input to the observed invocation shape and adapt
+        returned content to the repository output contract before deterministic
+        validation. Fail closed if the contract cannot be preserved.
       timeout: "{operations.agentTimeoutMs} ms"
+      onMissingConnection:
+        failClosedCode: E-AGENT-ERROR
+        action: surfaceErrorMessage
+        end: true
+      onUnavailableAgent:
+        failClosedCode: E-AGENT-ERROR
+        action: surfaceErrorMessage
+        end: true
       onTimeout:
         failClosedCode: E-AGENT-TIMEOUT
         action: surfaceErrorMessage
@@ -336,4 +385,5 @@ topic:
       - "Ref {shortRef}"
       - "Configured user-safe message from errorMessageOverrides"
     catalog: docs/workflow/fail-closed-catalog.md
+    connectedAgentExceptions: docs/workflow/copilot-studio-foundry-direct-connection.md
     implementation: src/orchestration/config-loader.mjs#resolveUserSafeMessage
