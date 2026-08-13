@@ -29,6 +29,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Accelerator: Python caches (agent/deployment/*.py scripts, issue #6)
+__pycache__/
+*.pyc
+
 # Accelerator: build, distribution, coverage, and test artifacts
 dist/
 build/
@@ -85,3 +89,15 @@ id_ed25519.pub
 # Accelerator: local scratch and validation output
 *.local.json
 tests/.artifacts/
+
+# Accelerator: Microsoft Foundry azd project runtime/local state (issue #6).
+# azd's own .azure/.gitignore already ignores everything under .azure/, this
+# is defense in depth so environment values, endpoints, and identifiers never
+# reach a commit even if azd's nested ignore file is ever removed.
+infra/foundry/.azure/
+**/.azure/
+# Local Foundry evaluation/observability cache and generated SDK credential
+# or config files that may carry project endpoints or agent identifiers.
+.foundry/
+agent/deployment/.local/
+agent/deployment/**/*.local.json

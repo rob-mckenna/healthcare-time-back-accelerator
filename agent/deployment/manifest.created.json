@@ -1,0 +1,12 @@
+{
+  "agentName": "shift-closeout-agent",
+  "kind": "prompt",
+  "modelDeploymentName": "gpt-4.1-mini",
+  "toolsAttached": [],
+  "temperature": 0.0,
+  "instructionVersion": "1.0.0",
+  "instructionSha256": "f9020da9288314426d3481c281233442e7359a2f893608aa5fb87fc85b401f96",
+  "agentVersion": "1",
+  "createdAtUtc": "2026-08-13T12:30:39.298368+00:00",
+  "note": "Project endpoint and Agent ID are intentionally omitted. See agent/deployment/.local/agent-version.local.json (gitignored, local machine only) for the full raw response."
+}
