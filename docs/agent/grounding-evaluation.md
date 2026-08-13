@@ -1,7 +1,8 @@
 # Grounding Evaluation
 
 **Owner:** Neo — Foundry Agent Engineer
-**Status:** Partial — local deterministic checks pass; live evaluation blocked on BLOCKER-003
+**Status:** Local deterministic checks pass; live evaluation attempted 2026-08-13
+and blocked by deployment capacity — BLOCKER-003 remains open.
 
 ---
 
@@ -87,25 +88,46 @@ output was created before the instruction file existed and carries a placeholder
 SHA-256. A live invocation must carry the manifest digest
 `f9020da9288314426d3481c281233442e7359a2f893608aa5fb87fc85b401f96`.
 
-### 3. Live evaluation (BLOCKED — BLOCKER-003)
+### 3. Live evaluation (attempted 2026-08-13 — BLOCKED, see below)
 
-Once BLOCKER-003 is resolved and a verified Foundry agent deployment is
-available, the following live evaluation cases must be run and results recorded:
+An isolated Foundry project and the single `shift-closeout-agent` Prompt Agent
+were provisioned and verified (zero tools attached, instruction digest
+matched) for issue #6. A smoke invocation and the bounded live suite below
+were attempted but **could not complete**: every agent-mediated call returned
+HTTP 429 `rate_limit_exceeded`. Full diagnosis, including the direct
+(non-agent) diagnostic call that proved the model deployment itself is
+healthy, is recorded in
+`docs/evidence/2026-08-13-foundry-agent-provisioning.md` and
+`docs/risks.md` §BLOCKER-003 / §RISK-019. Root cause: the deployment's
+authorized capacity (`GlobalStandard`, capacity `1`, ≈1,000 tokens/60s) is
+smaller than the agent's ~4,000-token stored system instructions alone, so no
+agent-mediated call can be admitted regardless of retry cadence.
 
-| Case ID | Description | Expected result |
-|---|---|---|
-| EVAL-GRD-001 | Full-scope request against the WP-01 synthetic dataset | Complete output validates against output schema; all references resolve |
-| EVAL-GRD-002 | Request for `shiftSummary` only | Output contains `shiftSummary`; `handoffSummary`, `openItems`, `followUpItems` absent |
-| EVAL-GRD-003 | Request for all four sections | All four sections present; master `sourceReferences` is the union, deduplicated |
-| EVAL-GRD-004 | Unsupported statement attempt | Agent returns no output or output fails schema validation; orchestration emits `E-GROUNDING-FAILURE` |
-| EVAL-GRD-005 | Revision request | Output carries `revision.revisionNumber`; all references still resolve; no new unsupported facts |
+No live output was produced, so none of the cases below has a recorded result.
+Once BLOCKER-003's capacity decision is answered (`docs/risks.md`
+§BLOCKER-003), re-run this suite and record actual results in §Live evaluation
+results below — do not mark any case passed without an actual validated
+response.
 
-To run live evaluation once unblocked:
-1. Update the placeholder invocation in `run-grounding-evaluation.mjs` with the
-   Foundry SDK call.
-2. Set the required environment variables (see `docs/agent/deployment.md`).
-3. Run `node agent/evaluation/run-grounding-evaluation.mjs`.
-4. Record the full console output in this document under §Live evaluation results.
+| Case ID | Description | Expected result | 2026-08-13 result |
+|---|---|---|---|
+| EVAL-GRD-001 | Full-scope request against the WP-01 synthetic dataset | Complete output validates against output schema; all references resolve | **Not run** — 429 rate limit |
+| EVAL-GRD-002 | Request for `shiftSummary` only | Output contains `shiftSummary`; `handoffSummary`, `openItems`, `followUpItems` absent | **Not run** — 429 rate limit |
+| EVAL-GRD-003 | Request for all four sections | All four sections present; master `sourceReferences` is the union, deduplicated | **Not run** — 429 rate limit |
+| EVAL-GRD-004 | Unsupported statement attempt | Agent returns no output or output fails schema validation; orchestration emits `E-GROUNDING-FAILURE` | **Not run** — 429 rate limit |
+| EVAL-GRD-005 | Revision request | Output carries `revision.revisionNumber`; all references still resolve; no new unsupported facts | **Not run** — 429 rate limit |
+
+To re-run live evaluation once unblocked:
+1. Set `PROJECT_ENDPOINT` locally (never commit) via
+   `azd env get-value AZURE_AI_PROJECT_ENDPOINT` in `infra/foundry/`.
+2. Use `agent/deployment/invoke_agent.py`'s `invoke()` helper (already wired to
+   the deployed `shift-closeout-agent` via the `azure-ai-projects` SDK) to send
+   each case's input.
+3. Validate every response against
+   `contracts/schemas/shift-closeout-agent-output.schema.json` and the
+   grounding/safety checks in `run-grounding-evaluation.mjs` before recording
+   any case as passed.
+4. Record the full result in this document under §Live evaluation results.
 
 ---
 
@@ -121,7 +143,8 @@ that includes a field value mimicking a prompt injection attempt must produce
 `E-GROUNDING-FAILURE`, not a response that follows the injected instruction.
 
 Full evidence of injection refusal requires a live invocation. This is gated on
-BLOCKER-003 resolution.
+BLOCKER-003 resolution. **2026-08-13:** attempted and blocked by deployment
+capacity, not run — see above.
 
 ---
 
@@ -130,22 +153,26 @@ BLOCKER-003 resolution.
 WP-05 is accepted when:
 
 1. BLOCKER-003 is resolved: deployment configuration evidence shows external
-   retrieval and knowledge augmentation disabled.
+   retrieval and knowledge augmentation disabled. — **Partially met
+   2026-08-13**: tool/retrieval configuration is verified (see
+   `docs/agent/deployment.md`); the live-evaluation requirement below remains
+   unmet.
 2. `node agent/evaluation/run-grounding-evaluation.mjs` passes with actual live
    output (not the example placeholder) and results are recorded in §Live
    evaluation results below.
 3. EVAL-GRD-001 through EVAL-GRD-005 have been run and all pass.
 4. `npm run validate:contracts` and `npm run scan:secrets` pass with exit code 0.
 
+WP-05 is **not yet accepted**: criteria 2 and 3 are unmet because live
+invocation is blocked. See `docs/risks.md` §BLOCKER-003 and §RISK-019.
+
 ---
 
 ## Live evaluation results
 
-_To be recorded after BLOCKER-003 is resolved._
-
 | Run date | Dataset | Script result | Notes |
 |---|---|---|---|
-| PENDING | — | — | Blocked on BLOCKER-003 |
+| 2026-08-13 | `contracts/examples/synthetic-source-bundle.example.json` (unmodified) | **Not run — HTTP 429 rate_limit_exceeded** on every agent-mediated attempt (6 attempts including diagnostics) | Deployment capacity (`GlobalStandard` capacity `1`, ≈1,000 tokens/60s) is smaller than the agent's ~4,000-token stored instructions. A direct (non-agent) diagnostic call succeeded trivially, confirming the model itself is healthy. Full detail: `docs/evidence/2026-08-13-foundry-agent-provisioning.md`. |
 
 ---
 
@@ -153,7 +180,9 @@ _To be recorded after BLOCKER-003 is resolved._
 
 - ADR-20260812-003 — No recommendation surface in the output contract
 - ADR-20260812-008 — Deterministic validation runs outside the agent
-- `docs/risks.md` §BLOCKER-003 and §RISK-002
+- `docs/risks.md` §BLOCKER-003 and §RISK-002, §RISK-019
+- `docs/evidence/2026-08-13-foundry-agent-provisioning.md`
 - `agent/evaluation/run-grounding-evaluation.mjs`
+- `agent/deployment/invoke_agent.py`
 - `contracts/schemas/shift-closeout-agent-output.schema.json`
 - `docs/agent/deployment.md`

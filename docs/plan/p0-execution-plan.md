@@ -212,21 +212,26 @@ proceed.
 | Owner | Neo |
 | Depends on | WP-03, WP-04; gated by BLOCKER-003 |
 | Requirements | REQ-SCOPE-002, REQ-AGT-001, REQ-AGT-005, REQ-SAFE-002 |
-| Target files | `agent/evaluation/**`, `docs/agent/deployment.md`, `docs/agent/grounding-evaluation.md` |
-| Status | **Blocked** — the evaluation harness and local grounding evaluation are complete; deployment, live invocation, and the external-retrieval configuration evidence wait on BLOCKER-003. Generation in the local slice runs through the documented simulation boundary in `src/orchestration/foundry-adapter.mjs`. |
+| Target files | `agent/evaluation/**`, `agent/deployment/**`, `docs/agent/deployment.md`, `docs/agent/grounding-evaluation.md` |
+| Status | **Partially unblocked, still blocked overall.** 2026-08-13 (issue #6): an isolated Foundry project and the single `shift-closeout-agent` Prompt Agent were provisioned and verified — zero tools attached, instruction digest matched. This satisfies the external-retrieval configuration half of BLOCKER-003. Live invocation and the live evaluation suite could not run: every agent-mediated call returned HTTP 429 `rate_limit_exceeded` because the authorized deployment capacity (`GlobalStandard`, capacity 1) is smaller than the agent's stored instructions. See `docs/evidence/2026-08-13-foundry-agent-provisioning.md` and `docs/risks.md` §BLOCKER-003 / §RISK-019 for full evidence and the human decision now required. Generation in the local slice still runs through the documented simulation boundary in `src/orchestration/foundry-adapter.mjs`. |
 
 **Acceptance criteria.**
 - Deployment configuration evidence shows external retrieval and knowledge
-  augmentation disabled, satisfying BLOCKER-003. No demonstration of generated
-  content occurs before this evidence exists.
+  augmentation disabled, satisfying BLOCKER-003. — **Met 2026-08-13** for the
+  configuration half; the live-behavioral half below remains unmet.
 - The agent accepts an input validating against the input contract and returns
-  output validating against the output contract.
+  output validating against the output contract. — **Not yet exercised**; no
+  live invocation has completed.
 - Provenance carries the correlation identifier unchanged plus the instruction
-  version and digest from WP-03.
+  version and digest from WP-03. — **Not yet exercised** for a live output; the
+  agent's stored instruction digest was verified independently of any
+  invocation.
 - An evaluation set over the WP-01 dataset shows complete grounding, and a
-  deliberately unsupported request is refused with `E-GROUNDING-FAILURE`.
+  deliberately unsupported request is refused with `E-GROUNDING-FAILURE`. — Met
+  for the local example set; **not yet met live**.
 - No configuration value is committed; endpoints resolve through
-  `environmentBindings`.
+  `environmentBindings`. — Met; the project endpoint and agent ID are resolved
+  only via the local, gitignored azd environment state.
 
 **Validation.**
 ```

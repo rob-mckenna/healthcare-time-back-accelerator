@@ -88,6 +88,7 @@ fixture for P0."
 | Severity | Blocker |
 | Affects | REQ-SAFE-002, REQ-AGT-004, work package WP-05 |
 | Blocks | Any demonstration of generated content. |
+| Status (2026-08-13) | **Partially answered, still open.** Tool/retrieval configuration verified. Live behavioral evaluation blocked by deployment capacity — see below. |
 
 **Evidence.** `safetyStatus.externalRetrievalDisabled` is pinned to `true` in the
 output contract, and `groundingCoverageRatio` is pinned to `1`. Both assume no
@@ -97,22 +98,60 @@ retrieval or knowledge-augmentation feature is enabled by default on the agent,
 content could enter a draft that does not resolve to the approved synthetic
 bundle — which in a healthcare handoff is unsourced clinical-adjacent text.
 
+**2026-08-13 update (issue #6).** An isolated, non-production Foundry project
+(`second-shift-p0-dev`, `eastus2`) was provisioned and exactly one Prompt Agent
+(`shift-closeout-agent`, model `gpt-4.1-mini` v`2025-04-14`, `GlobalStandard`
+capacity `1`) was created via the `azure-ai-projects` SDK v2 preview. Direct
+verification of the created agent's definition via SDK confirmed:
+
+- No `tools` key present on the agent definition (not merely an empty array).
+- No hosted agents, no capability host, and no Azure Container Registry exist
+  in the project (all confirmed empty/absent via direct `az`/`az rest` queries).
+- The agent's stored instructions SHA-256 matches
+  `manifest.json#instructionSha256` exactly:
+  `f9020da9288314426d3481c281233442e7359a2f893608aa5fb87fc85b401f96`.
+
+This directly verifies the tool/retrieval-configuration half of BLOCKER-003.
+
+**However, live behavioral evaluation could not be run.** Every agent-mediated
+invocation attempt (6 total, including diagnostics) returned HTTP 429
+`rate_limit_exceeded`. A direct, non-agent model call succeeded trivially
+(10 total tokens), proving the model deployment itself is healthy. The
+deployment's configured rate limits are `request: 1/60s` and `token: 1000/60s`
+— but the agent's stored system instructions alone are approximately 4,000
+tokens, so every agent-mediated call is rejected regardless of the caller's
+own input size or requested output length. This is a structural capacity
+mismatch, not a transient burst limit; waiting does not resolve it. Full
+diagnosis: `docs/evidence/2026-08-13-foundry-agent-provisioning.md`.
+
+Because no live output was produced, none was validated, and the smoke
+invocation plus the bounded live evaluation suite required by WP-05 (valid
+structured draft, source grounding, unsupported-fact refusal,
+prompt-injection refusal, prohibited-clinical-recommendation refusal,
+draft/safety constants, malformed/schema output handling) did not run.
+BLOCKER-003 is **not** resolved.
+
 **Safe options.**
 
 1. Verify the agent deployment configuration, disable every retrieval and
    knowledge-augmentation feature, and record the verified configuration as
-   evidence before any demonstration.
+   evidence before any demonstration. — **Done for the tool/retrieval half; see
+   the 2026-08-13 update above.**
 2. Keep the external grounding check as the compensating control and accept that
    a violation is detected after generation rather than prevented.
+3. **New.** Approve a capacity increase for the `gpt-4.1-mini` `GlobalStandard`
+   deployment (a capacity supporting roughly 6,000–8,000+ TPM would
+   comfortably admit the ~4,000-token instructions plus a typical input bundle
+   and output) so the live behavioral evaluation suite can actually run.
+   Without this, live evaluation cannot proceed at any retry cadence.
 
-**Recommendation.** Option 1, with option 2 retained as defence in depth. The
-grounding check is a genuine control, but preventing the content is better than
-refusing it afterwards.
+**Recommendation.** Option 1 is complete. Option 3 is required to finish the
+live-evaluation half of WP-05; option 2 remains as defence in depth regardless.
 
-**Exact human decision required.** "Confirm the Foundry agent deployment has
-external retrieval and knowledge augmentation disabled, and provide the
-configuration evidence to attach to WP-05." No demonstration of generated content
-proceeds until this is answered.
+**Exact human decision required.** "Approve a capacity increase for the
+`gpt-4.1-mini` deployment (or accept that live behavioral evaluation cannot run
+at capacity 1), so BLOCKER-003's live-evaluation requirement can be answered."
+No demonstration of live-generated content proceeds until this is answered.
 
 ### BLOCKER-004 — Governing charter is truncated and defines no blocker codes
 
@@ -169,6 +208,7 @@ section 9 onward will be completed."
 | RISK-016 | Node, npm, or AJV availability differs on another machine and validation cannot run | Trinity | Low | REQ-VAL-001 | Single dev dependency set, lockfile committed, no global tooling required | Mitigated at baseline |
 | RISK-017 | The simulated generation boundary is mistaken for a live Foundry agent in a demonstration | Trinity | High | REQ-SAFE-006, REQ-SCOPE-002 | `src/orchestration/foundry-adapter.mjs` exports `IS_SIMULATION_BOUNDARY` and a label naming BLOCKER-001 and BLOCKER-003; the local journey prints the boundary label before any draft and records it in the run evidence; `tests/integration/nurse-journey.test.mjs` asserts the run record says the live evaluation was not run | Mitigated at the artifact level; the spoken demonstration must still state it, per `docs/demo/talk-track.md` |
 | RISK-018 | A narrow secret-scan carve-out is widened until a committed credential passes | Trinity | Medium | REQ-VAL-003 | The carve-out applies to one rule only, fires only when the matched value contains a template interpolation, and leaves literal-value detection unchanged; `tests/security/secret-exposure.test.mjs` asserts twelve credential-shaped and identifier-shaped values still fire and that a literal key on a line that also contains an interpolation is still caught | Mitigated — 10 of 10 secret-exposure tests pass and `npm run scan:secrets` reports zero findings across 120 files |
+| RISK-019 | The isolated P0 Foundry deployment's minimal capacity (`GlobalStandard`, capacity 1, ≈1,000 tokens/60s) cannot admit a single agent-mediated call once the ~4,000-token versioned instructions are included, so live evaluation cannot run at this capacity regardless of retry cadence | Neo | High | REQ-AGT-004, work package WP-05 | Root-caused via a direct (non-agent) diagnostic call that succeeded trivially, isolating the failure to the agent-mediated code path; see `docs/evidence/2026-08-13-foundry-agent-provisioning.md` | Open — requires a human decision to approve a capacity increase or accept that live evaluation cannot run; see BLOCKER-003 |
 
 ## Review
 
@@ -182,3 +222,12 @@ in `docs/evidence/2026-08-12-integration-run.md`. RISK-009 moved to
 `Partially mitigated`. RISK-017 and RISK-018 were raised by this integration.
 BLOCKER-001, BLOCKER-002, BLOCKER-003, and BLOCKER-004 remain open and unchanged;
 no live Copilot Studio or Foundry work was performed or claimed.
+
+Updated 2026-08-13 for issue #6 (WP-05, BLOCKER-003). An isolated Foundry
+project and the single Prompt Agent were provisioned and verified with no
+tools attached — see `docs/evidence/2026-08-13-foundry-agent-provisioning.md`.
+BLOCKER-003 remains open: live behavioral evaluation could not run because the
+authorized deployment capacity cannot admit a single agent-mediated call.
+RISK-019 was raised to record this. BLOCKER-001, BLOCKER-002, and BLOCKER-004
+remain open and unchanged; BLOCKER-002 is not claimed resolved and no user
+identity propagation is claimed.
