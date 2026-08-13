@@ -8,6 +8,8 @@
  * - Every FAILED or BLOCKED outcome must carry a failClosedCode.
  */
 
+import { stripSensitiveKeys } from './sensitive-keys.mjs';
+
 /**
  * Emit an audit event to the configured sink.
  *
@@ -64,13 +66,14 @@ export async function emitAuditEvent(event, sink) {
  * @returns {object}
  */
 export function buildAuditEvent(params) {
+  const sanitized = stripSensitiveKeys(params);
   const {
     auditEventId, eventType, correlationId, occurredAt, organizationId,
     actorRef, actorType, actorRoleCode, outcome, failClosedCode, outcomeDetail,
     syntheticPatientId, syntheticEncounterId,
     artifactId, artifactVersion, generationId, approvalEventId,
     schemaValidationPassed, groundingVerified, decisionReasonPresent, revisionNumber,
-  } = params;
+  } = sanitized;
 
   const event = {
     contractVersion: '1.0.0',

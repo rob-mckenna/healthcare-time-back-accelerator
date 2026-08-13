@@ -15,15 +15,10 @@
  */
 
 import { failClosed } from './fail-closed.mjs';
-
-/** actorRef must match the opaque reference pattern. */
-const ACTOR_REF_PATTERN = /^(USR|AGT|SYS)-[A-Z0-9]{8,24}$/;
-
-/** userRoleCode values must match the contract enum. */
-const ROLE_CODES = new Set([
-  'registered-nurse', 'charge-nurse', 'clinical-supervisor',
-  'administrator', 'demo-observer'
-]);
+import {
+  assertAuthorizedRequester,
+  assertNoIdentityPropagation,
+} from '../governance/assert-authorized-requester.mjs';
 
 /**
  * Assert that a requester object is authenticated and authorized.
@@ -33,27 +28,9 @@ const ROLE_CODES = new Set([
  * @throws FailClosedError E-IDENTITY-MISSING on any failure
  */
 export function assertIdentity(requester, orgConfig) {
-  if (!requester || typeof requester !== 'object') {
-    throw failClosed('E-IDENTITY-MISSING', 'requester is absent');
-  }
+  const result = assertAuthorizedRequester(requester, orgConfig);
+  if (!result.ok) throw failClosed(result.failClosedCode, result.error);
 
-  if (requester.authenticated !== true) {
-    throw failClosed('E-IDENTITY-MISSING', 'requester.authenticated is not true');
-  }
-
-  if (!requester.actorRef || !ACTOR_REF_PATTERN.test(requester.actorRef)) {
-    throw failClosed('E-IDENTITY-MISSING', 'requester.actorRef is missing or malformed');
-  }
-
-  if (!requester.roleCode || !ROLE_CODES.has(requester.roleCode)) {
-    throw failClosed('E-IDENTITY-MISSING', `requester.roleCode "${requester.roleCode}" is not a recognised role code`);
-  }
-
-  const authorized = orgConfig?.personas?.authorizedRoleCodes ?? [];
-  if (!authorized.includes(requester.roleCode)) {
-    throw failClosed(
-      'E-IDENTITY-MISSING',
-      `requester.roleCode "${requester.roleCode}" is not in authorizedRoleCodes for org "${orgConfig?.organizationId}"`
-    );
-  }
+  const propagation = assertNoIdentityPropagation({ requester });
+  if (!propagation.ok) throw failClosed(propagation.failClosedCode, propagation.error);
 }

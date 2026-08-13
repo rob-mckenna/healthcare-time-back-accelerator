@@ -4,7 +4,7 @@
 **Requirement IDs:** REQ-WF-001, REQ-APPR-001, REQ-APPR-002, REQ-APPR-003, REQ-SAFE-004, REQ-AUD-002
 **Raised against:** BLOCKER-001, BLOCKER-002 (`docs/risks.md`)
 **Issue:** #5 — Resolve BLOCKER-002 identity and authorization for connected Foundry agent
-**Related work:** #4 (direct Copilot Studio–Foundry connection), #6 (Foundry grounding) — connected-tenant testing is a dependency of both
+**Related work:** #4 (direct Copilot Studio–Foundry connection), #6 (Foundry grounding)
 
 ---
 
@@ -52,7 +52,7 @@ two independent envelopes, checked at two different points in the workflow:
 ```jsonc
 {
   "requester": {
-    "actorRef": "USR-RN0000000001",   // opaque, pattern ^(USR|AGT|SYS)-[A-Z0-9]{8,24}$
+    "actorRef": "USR-RN0000000001",   // opaque human reference, pattern ^USR-[A-Z0-9]{8,24}$
     "roleCode": "registered-nurse",    // must be in personas.authorizedRoleCodes for the org
     "authenticated": true              // must be exactly true
   },
@@ -83,10 +83,11 @@ two independent envelopes, checked at two different points in the workflow:
 }
 ```
 
-**Nothing else may be present anywhere in either envelope.** No display
-name, email address, user principal name, access/refresh/ID token, tenant or
-object identifier, phone number, or date of birth may appear at any nesting
-depth. This is enforced structurally, not by convention — see
+No display name, email address, user principal name, access/refresh/ID token,
+tenant or object identifier, phone number, or date of birth may appear at
+any nesting depth. Key comparison is case-insensitive and ignores separators,
+so variants such as `Email`, `DISPLAY_NAME`, and `access_token` are also
+refused. This is enforced structurally, not by convention — see
 [Enforcement](#enforcement) below.
 
 ---
@@ -100,7 +101,7 @@ none of them throw, matching the existing convention in
 
 | Function | Gate | Reused fail-closed code |
 |---|---|---|
-| `assertAuthorizedRequester(requester, orgConfig)` | Authenticated, opaque `actorRef`, `roleCode` recognised and authorized for the organization | `E-IDENTITY-MISSING` |
+| `assertAuthorizedRequester(requester, orgConfig)` | Authenticated human `USR-*` actor, opaque `actorRef`, `roleCode` recognised and authorized for the organization | `E-IDENTITY-MISSING` |
 | `assertNoIdentityPropagation(handoff)` | No forbidden identity-bearing field name anywhere in the payload, at any depth | `E-IDENTITY-MISSING` |
 | `assertPreGenerationHandoff(params)` | Requester gate + propagation gate + well-formed synthetic patient/encounter IDs + fresh, non-future `preGenerationConfirmedAt` + `confirmedByRef === requester.actorRef` ("wrong confirmer" rejection) | `E-IDENTITY-MISSING` / `E-CONTEXT-UNCONFIRMED` |
 | `assertPreApprovalHandoff(params)` | Approver gate + propagation gate + reconfirmed patient/encounter equal to the original request context + fresh, non-future `preApprovalConfirmedAt` + `reconfirmedByRef === approver.actorRef` ("wrong confirmer" rejection) | `E-IDENTITY-MISSING` / `E-APPROVAL-WITHOUT-CONFIRMATION` |
@@ -139,11 +140,12 @@ confirmation from a different actor is caught before it ever reaches
 ### No identity propagation
 
 `assertNoIdentityPropagation` walks the entire handoff object recursively
-(objects and arrays, any depth) and reports any key name on a fixed deny-list
-(`name`, `displayName`, `email`, `upn`, `userPrincipalName`, `accessToken`,
-`idToken`, `tenantId`, `oid`, `phone`, `dateOfBirth`, and others — see
-`FORBIDDEN_IDENTITY_KEYS` in the module). **Only key names are inspected —
-values are never read or repeated.** This means a refusal can name exactly
+(objects and arrays, any depth) and reports any normalized key name on a
+fixed deny-list (`name`, `displayName`, `email`, `upn`,
+`userPrincipalName`, `accessToken`, `idToken`, `tenantId`, `oid`, `phone`,
+`dateOfBirth`, and others). Key matching lowercases and removes punctuation,
+so casing and underscore/hyphen variants cannot bypass the filter. **Only
+key names are inspected — values are never read or repeated.** This means a refusal can name exactly
 which field was rejected (e.g. `requester.email`) without ever writing the
 offending value into an error message, a log line, or an audit event. This
 is verified directly in `tests/security/audit-minimality.test.mjs`.
@@ -152,61 +154,38 @@ is verified directly in `tests/security/audit-minimality.test.mjs`.
 
 ## Enforcement
 
-This module is a governance primitive: it is written, tested, and documented
-here, but it is **not yet wired into the orchestration call path**
-(`src/orchestration/identity-guard.mjs`, `src/orchestration/foundry-adapter.mjs`).
-Those files are integration-owned by Trinity/Tank and are explicitly out of
-scope for this change — see the redline request below.
+The control is wired into the running orchestration:
 
-Until that wiring lands, this module is exercised directly by:
+- `identity-guard.mjs` delegates requester and approver authorization to
+  `assertAuthorizedRequester`.
+- `shift-closeout-runner.mjs::requestDraft()` invokes
+  `assertPreGenerationHandoff` before input construction and scans the final
+  agent input again before the Foundry adapter boundary.
+- `approval-orchestrator.mjs::recordDecision()` invokes
+  `assertPreApprovalHandoff` before any decision is constructed.
+- `shift-closeout-runner.mjs::recordDecision()` requires and threads the
+  explicit `reconfirmedByRef`.
+
+The control is exercised directly and through production orchestration by:
 
 - `tests/integration/missing-identity.test.mjs`
 - `tests/integration/unauthorized-role.test.mjs`
 - `tests/integration/stale-context.test.mjs`
+- `tests/integration/connected-agent-orchestration.test.mjs`
 - `tests/security/audit-minimality.test.mjs`
 
 against fixtures in `data/synthetic/governance/`.
 
 ---
 
-## Redline request for Trinity — `src/orchestration/identity-guard.mjs`
+## Human-only approval authority
 
-**This repository change does not edit `src/orchestration/identity-guard.mjs`.**
-The following is a request for Trinity (or the next agent with write access
-to `src/orchestration/**`) to review and, if accepted, implement:
-
-1. At the point where `identity-guard.mjs` currently calls
-   `assertIdentity(requester, orgConfig)` (used by
-   `shift-closeout-runner.mjs`'s `requestDraft()`), additionally call
-   `assertPreGenerationHandoff({ requester, context, orgConfig })` from
-   `src/governance/assert-authorized-requester.mjs` before
-   `foundry-adapter.mjs` is invoked. Map a non-`ok` result to the existing
-   fail-closed handling already present in `shift-closeout-runner.mjs`
-   (the `failClosedCode` on the result maps directly to the codes already
-   switched on there).
-2. Before `recordDecision()` calls `assertPreApprovalConfirmed` (currently in
-   `src/orchestration/context-guard.mjs`), additionally call
-   `assertPreApprovalHandoff({ approver, reconfirmedContext, reconfirmedByRef, originalContext, orgConfig })`.
-   This requires the approval/decision call site to capture and pass a
-   `reconfirmedByRef` — the opaque actor reference of whoever performed the
-   pre-approval reconfirmation — which is not currently threaded through
-   `recordDecision()`'s parameters. Today `recordDecision()` implicitly
-   assumes the reconfirmer is the approver; this redline makes that
-   assumption an explicit, checked assertion rather than an implicit one,
-   which matters specifically for the connected-agent path where the
-   reconfirming UI turn and the deciding UI turn could, in principle, be
-   driven by different unverified upstream claims.
-3. Consider whether `assertNoIdentityPropagation` should also run against the
-   full `agentInput` object built by `input-builder.mjs` immediately before
-   the call to `foundry-adapter.mjs::invoke()`, as a final defense-in-depth
-   check that no identity-bearing field reached the boundary of the
-   simulation adapter (and, when BLOCKER-001's live invocation path replaces
-   the simulation, the boundary of the live Foundry call).
-
-None of the above is implemented in this change. `src/orchestration/**` is
-outside this repository change's write boundary; this section exists so the
-next reviewer can accept, modify, or reject the wiring without needing to
-re-derive the design from the module's source comments.
+Authorization is not inferred from role code alone. Request and decision
+actors must use an opaque `USR-*` reference. `AGT-*`, `SYS-*`, malformed,
+missing, or unauthenticated identities fail with `E-IDENTITY-MISSING`, even
+if they supply an otherwise authorized nursing role. The standalone approval
+builder applies the same human-only restriction so an alternate code path
+cannot manufacture an agent- or system-approved event.
 
 ---
 
@@ -217,13 +196,14 @@ envelope above is what Copilot Studio would need to construct and pass
 toward the connected Foundry agent. **Whether Copilot Studio's built-in
 connected-agent path can actually be configured to produce exactly this
 envelope — with no more and no less — in the target tenant is not verified
-by this change.** That requires connected-tenant testing against a live
-Copilot Studio environment and a live Foundry project, which depends on the
-outcomes of #4 (direct Copilot Studio–Foundry connection) and #6 (Foundry
-grounding). Live identity propagation remains unverified until that
-connected testing is performed. No demonstration or documentation produced
-by this change may represent live Entra identity or role-claim propagation
-as operational.
+by this change.** That requires connected-tenant testing against a live Copilot Studio
+environment and Foundry project. Issues #4 and #6 established the documented
+connection design and isolated Foundry evidence, but direct Copilot Studio
+connected-agent validation remains **NOT RUN** under RISK-020. The negative
+paths in this PR are executable local production-orchestration evidence, not
+connected-tenant evidence. Live identity propagation remains unverified
+until that connected testing is performed, and no demonstration or
+documentation may represent it as operational.
 
 ---
 
@@ -233,6 +213,7 @@ as operational.
 node --test tests/integration/missing-identity.test.mjs
 node --test tests/integration/unauthorized-role.test.mjs
 node --test tests/integration/stale-context.test.mjs
+node --test tests/integration/connected-agent-orchestration.test.mjs
 node --test tests/security/audit-minimality.test.mjs
 node src/governance/test/run-governance-checks.mjs
 node scripts/validate-contracts.mjs

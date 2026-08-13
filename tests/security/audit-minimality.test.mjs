@@ -34,6 +34,7 @@ import {
   _internal,
 } from '../../src/governance/assert-authorized-requester.mjs';
 import { buildAuditEvent } from '../../src/governance/audit.mjs';
+import { _internal as sensitiveKeyInternal } from '../../src/governance/sensitive-keys.mjs';
 import { validateAgainstSchema } from '../../src/governance/validate-payload.mjs';
 import { createApprovalEvent } from '../../src/governance/approval.mjs';
 
@@ -117,6 +118,9 @@ test('buildAuditEvent ignores fields not on its explicit allow-list', () => {
     displayName: 'Sample Nurse Testcase',
     email: 'nurse.testcase@hospital.example',
     accessToken: 'PLACEHOLDER-NOT-A-REAL-TOKEN',
+    Email: 'n.testcase@hospital.example',
+    access_token: 'PLACEHOLDER-NOT-A-REAL-TOKEN',
+    nested: { DISPLAY_NAME: 'Sample Nurse Testcase' },
     narrative: 'Patient improved overnight and handoff notes were extensive.',
   });
 
@@ -124,6 +128,9 @@ test('buildAuditEvent ignores fields not on its explicit allow-list', () => {
   assert.ok(!('displayName' in event));
   assert.ok(!('email' in event));
   assert.ok(!('accessToken' in event));
+  assert.ok(!('Email' in event));
+  assert.ok(!('access_token' in event));
+  assert.ok(!('nested' in event));
   assert.ok(!('narrative' in event));
   for (const sensitive of SENSITIVE_VALUES) {
     assert.ok(!serialized.includes(sensitive), `built audit event must not contain "${sensitive}"`);
@@ -201,8 +208,8 @@ test('createApprovalEvent approver block carries only actorRef, roleCode, authen
 // Deny-list coverage — every field name in the deny-list is actually caught
 // ============================================================================
 
-test('every field in FORBIDDEN_IDENTITY_KEYS is detected at the top level of a handoff object', () => {
-  for (const key of _internal.FORBIDDEN_IDENTITY_KEYS) {
+test('every normalized sensitive key is detected at the top level of a handoff object', () => {
+  for (const key of sensitiveKeyInternal.SENSITIVE_KEY_NAMES) {
     const handoff = { requester: { actorRef: 'USR-RN0000000001', [key]: 'placeholder-value' } };
     const findings = _internal.findForbiddenIdentityFields(handoff);
     assert.ok(
@@ -210,6 +217,21 @@ test('every field in FORBIDDEN_IDENTITY_KEYS is detected at the top level of a h
       `expected field "${key}" to be detected, found paths: ${findings.join(', ')}`
     );
   }
+});
+
+test('sensitive key detection is case-insensitive and separator-insensitive', () => {
+  const handoff = {
+    requester: {
+      Email: 'n.testcase@hospital.example',
+      access_token: 'PLACEHOLDER-NOT-A-REAL-TOKEN',
+      DISPLAY_NAME: 'Sample Nurse Testcase',
+    },
+  };
+  const findings = _internal.findForbiddenIdentityFields(handoff);
+  assert.deepEqual(
+    findings.sort(),
+    ['requester.DISPLAY_NAME', 'requester.Email', 'requester.access_token'].sort()
+  );
 });
 
 test('deny-list detection does not false-positive on the approved opaque envelope', () => {

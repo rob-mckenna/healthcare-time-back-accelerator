@@ -56,13 +56,13 @@ Rules that apply to every code (from `docs/conventions/draft-and-safety-status.m
 
 | Attribute | Value |
 |---|---|
-| Trigger | `context.preGenerationConfirmedAt` absent or invalid; `syntheticPatientId` or `syntheticEncounterId` missing; `confirmedByRef` absent |
-| Guard | `src/orchestration/context-guard.mjs#assertPreGenerationConfirmed` |
+| Trigger | Confirmation absent, malformed, stale, future-dated, or attributed to an actor other than the requester |
+| Guard | `src/governance/assert-authorized-requester.mjs#assertPreGenerationHandoff` |
 | Audit eventType | `context-confirmation` |
 | Audit outcome | `blocked` |
 | User message source | `safetyCopy.errorMessageOverrides["E-CONTEXT-UNCONFIRMED"]` |
 | Default message | "Patient and encounter confirmation is required before a draft can be requested." |
-| Test coverage | `run-fail-closed-catalog.mjs` — missing confirmation, null context |
+| Test coverage | `run-fail-closed-catalog.mjs`; `connected-agent-orchestration.test.mjs`; `stale-context.test.mjs` |
 
 ---
 
@@ -155,13 +155,13 @@ Rules that apply to every code (from `docs/conventions/draft-and-safety-status.m
 
 | Attribute | Value |
 |---|---|
-| Trigger | `reconfirmedContext.preApprovalConfirmedAt` absent or invalid; patient or encounter mismatch between approval event and agent input; decision reason absent for reject or revision |
-| Guard | `src/orchestration/context-guard.mjs#assertPreApprovalConfirmed`; `src/orchestration/approval-orchestrator.mjs#recordDecision` |
+| Trigger | Reconfirmation absent, malformed, stale, future-dated, attributed to the wrong actor, or for a mismatched patient/encounter; decision reason absent for reject or revision |
+| Guard | `src/governance/assert-authorized-requester.mjs#assertPreApprovalHandoff`; `src/orchestration/approval-orchestrator.mjs#recordDecision` |
 | Audit eventType | `decision` |
 | Audit outcome | `blocked` |
 | User message source | `safetyCopy.errorMessageOverrides["E-APPROVAL-WITHOUT-CONFIRMATION"]` |
 | Default message | "Patient and encounter confirmation is required before a decision can be recorded." |
-| Test coverage | `run-fail-closed-catalog.mjs` — missing preApprovalConfirmedAt, patient mismatch, encounter mismatch |
+| Test coverage | `run-fail-closed-catalog.mjs`; `connected-agent-orchestration.test.mjs`; `stale-context.test.mjs` |
 
 ---
 

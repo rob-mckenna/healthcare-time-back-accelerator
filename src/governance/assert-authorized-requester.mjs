@@ -29,10 +29,10 @@
  * This module does not, and cannot, verify that Copilot Studio's connected
  * Foundry agent actually receives or enforces these values at runtime — that
  * requires connected-tenant testing (tracked as a dependency on #4 and #6).
- * What it verifies is that no downstream component in this repository can
- * proceed to generation or approval without a requester object that already
- * satisfies every gate below, and that no email, display name, token, or
- * other direct identifier is ever accepted into governed state.
+ * What it verifies is that the production orchestration cannot proceed to
+ * generation or approval without a requester object that satisfies every
+ * gate below, and that no email, display name, token, or other direct
+ * identifier is accepted into governed state.
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * Design notes:
@@ -43,15 +43,14 @@
  *     contracts/schemas/common/definitions.schema.json#/$defs/failClosedCode.
  *     No new fail-closed code is introduced — contracts/** is out of scope
  *     for this change; see the Trinity redline request in the WP-05 report.
- *   - This module intentionally duplicates the identity and role checks in
- *     src/orchestration/identity-guard.mjs rather than importing it. That
- *     file is orchestration-owned (Trinity/Tank) and is explicitly excluded
- *     from this change. Duplication here is deliberate defense in depth: the
- *     connected-agent path must be independently and redundantly validated
- *     precisely because its upstream propagation is unverified.
+ *   - src/orchestration/identity-guard.mjs delegates to this module so the
+ *     standalone governance checks and the running workflow cannot drift.
  */
 
+import { findSensitiveKeyPaths } from './sensitive-keys.mjs';
+
 const ACTOR_REF_PATTERN = /^(USR|AGT|SYS)-[A-Z0-9]{8,24}$/;
+const HUMAN_ACTOR_REF_PATTERN = /^USR-[A-Z0-9]{8,24}$/;
 const SYN_PAT_PATTERN = /^SYN-PAT-[A-Z0-9]{8,16}$/;
 const SYN_ENC_PATTERN = /^SYN-ENC-[A-Z0-9]{8,16}$/;
 const UTC_TS_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z$/;
@@ -82,43 +81,7 @@ const DEFAULT_MAX_CONTEXT_AGE_MS = 15 * 60 * 1000;
  * the source is a misconfigured topic variable, a directory claim passed
  * through unfiltered, or an adversarial test.
  */
-const FORBIDDEN_IDENTITY_KEYS = new Set([
-  'name', 'displayName', 'givenName', 'surname', 'familyName', 'fullName', 'preferredName',
-  'email', 'emailAddress', 'mail', 'upn', 'userPrincipalName',
-  'token', 'accessToken', 'idToken', 'refreshToken', 'bearerToken', 'jwt', 'sessionToken',
-  'samAccountName', 'objectId', 'oid', 'tid', 'tenantId', 'sub', 'guid',
-  'phone', 'telephone', 'mobilePhone', 'ssn', 'socialSecurityNumber',
-  'dob', 'dateOfBirth', 'ipAddress', 'deviceId',
-]);
-
-/**
- * Recursively walk a value and collect any forbidden identity-bearing key
- * found at any depth. Arrays and nested objects are both scanned. Only key
- * *names* are inspected here — values are never inspected or logged, so a
- * finding can be reported without repeating the offending content anywhere
- * (including in an error message or audit event).
- *
- * @param {unknown} value
- * @param {string} path
- * @param {string[]} found
- * @returns {string[]} field paths carrying a forbidden key name
- */
-function findForbiddenIdentityFields(value, path = '', found = []) {
-  if (Array.isArray(value)) {
-    value.forEach((item, i) => findForbiddenIdentityFields(item, `${path}[${i}]`, found));
-    return found;
-  }
-  if (value && typeof value === 'object') {
-    for (const key of Object.keys(value)) {
-      const nextPath = path ? `${path}.${key}` : key;
-      if (FORBIDDEN_IDENTITY_KEYS.has(key)) {
-        found.push(nextPath);
-      }
-      findForbiddenIdentityFields(value[key], nextPath, found);
-    }
-  }
-  return found;
-}
+const findForbiddenIdentityFields = findSensitiveKeyPaths;
 
 /**
  * Resolve the effective maximum context age in milliseconds.
@@ -154,7 +117,7 @@ function refuse(failClosedCode, error) {
 
 /**
  * Assert that a requester is authenticated, carries a well-formed opaque
- * actorRef, and holds a roleCode that is both a recognised contract role and
+ * human USR- actorRef, and holds a roleCode that is both a recognised contract role and
  * explicitly authorized for the given organization. This is the same shape
  * of check performed by src/orchestration/identity-guard.mjs, reimplemented
  * here as an independent, non-throwing gate for the connected-agent handoff
@@ -172,8 +135,8 @@ export function assertAuthorizedRequester(requester, orgConfig) {
   if (requester.authenticated !== true) {
     return refuse('E-IDENTITY-MISSING', 'requester.authenticated is not true');
   }
-  if (!requester.actorRef || typeof requester.actorRef !== 'string' || !ACTOR_REF_PATTERN.test(requester.actorRef)) {
-    return refuse('E-IDENTITY-MISSING', 'requester.actorRef is missing or malformed (must match USR-/AGT-/SYS- opaque pattern)');
+  if (!requester.actorRef || typeof requester.actorRef !== 'string' || !HUMAN_ACTOR_REF_PATTERN.test(requester.actorRef)) {
+    return refuse('E-IDENTITY-MISSING', 'requester.actorRef is missing, malformed, or not a human USR- reference');
   }
   if (!requester.roleCode || !ROLE_CODES.has(requester.roleCode)) {
     return refuse('E-IDENTITY-MISSING', `requester.roleCode "${requester.roleCode}" is not a recognised role code`);
@@ -366,7 +329,7 @@ export function assertPreApprovalHandoff(params) {
 export const _internal = {
   ACTOR_REF_PATTERN,
   ROLE_CODES,
-  FORBIDDEN_IDENTITY_KEYS,
+  HUMAN_ACTOR_REF_PATTERN,
   DEFAULT_MAX_CONTEXT_AGE_MS,
   findForbiddenIdentityFields,
   resolveMaxContextAgeMs,

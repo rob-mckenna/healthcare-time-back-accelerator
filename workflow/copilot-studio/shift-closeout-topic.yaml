@@ -118,8 +118,8 @@ topic:
         end: true
       onYes:
         action: recordConfirmation
-        # Records preGenerationConfirmedAt (UTC ISO-8601) and confirmedByRef
-      implementation: src/orchestration/context-guard.mjs#assertPreGenerationConfirmed
+        # Records preGenerationConfirmedAt and confirmedByRef from the same human USR-* actor.
+      implementation: src/governance/assert-authorized-requester.mjs#assertPreGenerationHandoff
 
     - id: auditContextConfirmation
       kind: audit
@@ -278,8 +278,9 @@ topic:
           kind: message
           label: "Re-present patient and encounter for approval confirmation"
           notes: >
-            Second, independent confirmation. preApprovalConfirmedAt recorded now.
-            Patient and encounter must match the generation-gate values exactly.
+            Second, independent confirmation. preApprovalConfirmedAt and
+            reconfirmedByRef are recorded from the current human USR-* actor.
+            Confirmation must be fresh; patient, encounter, and actor must match.
           onMismatch:
             failClosedCode: E-APPROVAL-WITHOUT-CONFIRMATION
             action: surfaceErrorMessage
@@ -288,7 +289,7 @@ topic:
             failClosedCode: E-APPROVAL-WITHOUT-CONFIRMATION
             action: surfaceErrorMessage
             end: true
-          implementation: src/orchestration/context-guard.mjs#assertPreApprovalConfirmed
+          implementation: src/governance/assert-authorized-requester.mjs#assertPreApprovalHandoff
 
         - id: recordApproval
           kind: action

@@ -12,6 +12,7 @@
 import { scanText } from './phi-scan.mjs';
 
 const ALLOWED_DECISIONS = new Set(['approved', 'rejected', 'revision-requested']);
+const HUMAN_ACTOR_REF_PATTERN = /^USR-[A-Z0-9]{8,24}$/;
 
 const LIFECYCLE_MAP = {
   approved: 'APPROVED-SIMULATED',
@@ -71,6 +72,13 @@ export function createApprovalEvent(params) {
     return {
       error: `unknown decision '${decision}'`,
       failClosedCode: 'E-INPUT-SCHEMA-INVALID',
+    };
+  }
+
+  if (!HUMAN_ACTOR_REF_PATTERN.test(actorRef ?? '')) {
+    return {
+      error: 'approval actorRef must be an opaque human USR- reference',
+      failClosedCode: 'E-IDENTITY-MISSING',
     };
   }
 
