@@ -33,7 +33,11 @@ import {
   assertPreApprovalHandoff,
   _internal,
 } from '../../src/governance/assert-authorized-requester.mjs';
-import { buildAuditEvent } from '../../src/governance/audit.mjs';
+import {
+  buildAuditEvent,
+  emitAuditEvent,
+  _internal as auditInternal,
+} from '../../src/governance/audit.mjs';
 import { _internal as sensitiveKeyInternal } from '../../src/governance/sensitive-keys.mjs';
 import { validateAgainstSchema } from '../../src/governance/validate-payload.mjs';
 import { createApprovalEvent } from '../../src/governance/approval.mjs';
@@ -160,6 +164,90 @@ test('an audit event built with only allow-listed fields validates against audit
   assert.equal(r.valid, true, r.errors?.map(e => `${e.instancePath} ${e.message}`).join('; '));
 });
 
+test('outcomeDetail replaces sensitive free text with one deterministic safe reason code', () => {
+  const bearerToken = `${['Bear', 'er'].join('')} eyJhbGciOiJIUzI1NiJ9.SECRET.signature`;
+  const sensitiveDetails = [
+    'nurse.testcase@hospital.example',
+    bearerToken,
+    'access_token=PLACEHOLDER-NOT-A-REAL-TOKEN',
+    'client_secret: PLACEHOLDER-NOT-A-REAL-SECRET',
+    'api-key=PLACEHOLDER-NOT-A-REAL-KEY',
+    '{"patient":{"notes":"sensitive payload content"}}',
+  ];
+
+  for (const outcomeDetail of sensitiveDetails) {
+    const event = buildAuditEvent({
+      auditEventId: 'AUD-20260813A003',
+      eventType: 'request',
+      correlationId: 'CORR-20260813-9f2a4c7d1b6e48a0b3c5d7e9f1a2b4c6',
+      occurredAt: '2026-08-13T06:45:00Z',
+      organizationId: 'harborlight',
+      actorRef: 'USR-RN0000000001',
+      actorType: 'human',
+      outcome: 'blocked',
+      failClosedCode: 'E-IDENTITY-MISSING',
+      outcomeDetail,
+    });
+
+    assert.equal(event.outcomeDetail, auditInternal.REDACTED_OUTCOME_DETAIL);
+    assert.ok(!JSON.stringify(event).includes(outcomeDetail));
+  }
+});
+
+test('outcomeDetail maps known internal messages to allow-listed reason codes', () => {
+  for (const [detail, reasonCode] of auditInternal.OUTCOME_DETAIL_CODES) {
+    assert.equal(auditInternal.safeOutcomeDetail(detail), reasonCode);
+  }
+});
+
+test('emitAuditEvent sanitizes direct-call events before they reach the sink', async () => {
+  let received;
+  const bearerSecret = ['Bear', 'er SECRET'].join('');
+  const result = await emitAuditEvent({
+    auditEventId: 'AUD-20260813A004',
+    eventType: 'request',
+    correlationId: 'CORR-20260813-9f2a4c7d1b6e48a0b3c5d7e9f1a2b4c6',
+    occurredAt: '2026-08-13T06:45:00Z',
+    organizationId: 'harborlight',
+    actorRef: 'USR-RN0000000001',
+    actorType: 'human',
+    outcome: 'blocked',
+    failClosedCode: 'E-IDENTITY-MISSING',
+    outcomeDetail: `nurse.testcase@hospital.example ${bearerSecret}`,
+    nested: { client_secret: 'PLACEHOLDER-NOT-A-REAL-SECRET' },
+  }, async (event) => {
+    received = event;
+  });
+
+  assert.equal(result.success, true);
+  assert.equal(received.outcomeDetail, auditInternal.REDACTED_OUTCOME_DETAIL);
+  assert.ok(!('nested' in received));
+  assert.ok(!JSON.stringify(received).includes('nurse.testcase@hospital.example'));
+  assert.ok(!JSON.stringify(received).includes('PLACEHOLDER-NOT-A-REAL-SECRET'));
+});
+
+test('emitAuditEvent never returns a sensitive sink exception verbatim', async () => {
+  const bearerSecret = ['Bear', 'er SECRET'].join('');
+  const result = await emitAuditEvent(
+    buildAuditEvent({
+      auditEventId: 'AUD-20260813A005',
+      eventType: 'request',
+      correlationId: 'CORR-20260813-9f2a4c7d1b6e48a0b3c5d7e9f1a2b4c6',
+      occurredAt: '2026-08-13T06:45:00Z',
+      organizationId: 'harborlight',
+      actorRef: 'USR-RN0000000001',
+      actorType: 'human',
+      outcome: 'success',
+    }),
+    async () => {
+      throw new Error(`nurse.testcase@hospital.example ${bearerSecret}`);
+    }
+  );
+
+  assert.equal(result.success, false);
+  assert.equal(result.detail, 'audit sink rejected event');
+});
+
 // ============================================================================
 // Approval attribution stays opaque even under a connected-agent handoff
 // ============================================================================
@@ -232,6 +320,30 @@ test('sensitive key detection is case-insensitive and separator-insensitive', ()
     findings.sort(),
     ['requester.DISPLAY_NAME', 'requester.Email', 'requester.access_token'].sort()
   );
+});
+
+test('credential-bearing key variants are rejected recursively', () => {
+  const handoff = {
+    requester: {
+      Authorization: 'Bearer PLACEHOLDER-NOT-A-REAL-TOKEN',
+      'authorization-header': 'Bearer PLACEHOLDER-NOT-A-REAL-TOKEN',
+      client_secret: 'PLACEHOLDER-NOT-A-REAL-SECRET',
+      ClientSecret: 'PLACEHOLDER-NOT-A-REAL-SECRET',
+      nested: {
+        'API-Key': 'PLACEHOLDER-NOT-A-REAL-KEY',
+        children: [{ X_API_KEY: 'PLACEHOLDER-NOT-A-REAL-KEY' }],
+      },
+    },
+  };
+  const findings = _internal.findForbiddenIdentityFields(handoff);
+  assert.deepEqual(findings.sort(), [
+    'requester.Authorization',
+    'requester.ClientSecret',
+    'requester.authorization-header',
+    'requester.client_secret',
+    'requester.nested.API-Key',
+    'requester.nested.children[0].X_API_KEY',
+  ].sort());
 });
 
 test('deny-list detection does not false-positive on the approved opaque envelope', () => {

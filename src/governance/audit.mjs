@@ -10,6 +10,25 @@
 
 import { stripSensitiveKeys } from './sensitive-keys.mjs';
 
+const OUTCOME_DETAIL_CODES = new Map([
+  ['Organization config load failure', 'AUDIT-REASON-CONFIG-LOAD-FAILURE'],
+  ['Correlation identifier supplied outside a revision continuation', 'AUDIT-REASON-CORRELATION-REUSE'],
+  ['Identity or authorization check failed', 'AUDIT-REASON-IDENTITY-CHECK-FAILURE'],
+  ['Pre-generation context confirmation failed', 'AUDIT-REASON-CONTEXT-CONFIRMATION-FAILURE'],
+  ['Agent input schema validation failed', 'AUDIT-REASON-INPUT-SCHEMA-FAILURE'],
+  ['Agent input carried a disallowed identity field', 'AUDIT-REASON-SENSITIVE-KEY-REFUSAL'],
+  ['Agent invocation failed', 'AUDIT-REASON-AGENT-INVOCATION-FAILURE'],
+  ['Post-generation validation failed', 'AUDIT-REASON-OUTPUT-VALIDATION-FAILURE'],
+  ['Identity check failed at decision gate', 'AUDIT-REASON-DECISION-IDENTITY-FAILURE'],
+  ['Decision recording failed', 'AUDIT-REASON-DECISION-RECORDING-FAILURE'],
+]);
+const REDACTED_OUTCOME_DETAIL = 'AUDIT-REASON-REDACTED';
+
+function safeOutcomeDetail(value) {
+  if (value == null) return undefined;
+  return OUTCOME_DETAIL_CODES.get(value) ?? REDACTED_OUTCOME_DETAIL;
+}
+
 /**
  * Emit an audit event to the configured sink.
  *
@@ -26,13 +45,13 @@ export async function emitAuditEvent(event, sink) {
     };
   }
   try {
-    await sink(event);
+    await sink(buildAuditEvent(event));
     return { success: true };
-  } catch (err) {
+  } catch {
     return {
       success: false,
       failClosedCode: 'E-AUDIT-WRITE-FAILURE',
-      detail: err?.message ?? 'audit sink threw an error',
+      detail: 'audit sink rejected event',
     };
   }
 }
@@ -89,7 +108,7 @@ export function buildAuditEvent(params) {
 
   if (actorRoleCode != null)            event.actorRoleCode = actorRoleCode;
   if (failClosedCode != null)           event.failClosedCode = failClosedCode;
-  if (outcomeDetail != null)            event.outcomeDetail = outcomeDetail;
+  if (outcomeDetail != null)            event.outcomeDetail = safeOutcomeDetail(outcomeDetail);
   if (syntheticPatientId != null)       event.syntheticPatientId = syntheticPatientId;
   if (syntheticEncounterId != null)     event.syntheticEncounterId = syntheticEncounterId;
   if (artifactId != null)               event.artifactId = artifactId;
@@ -103,3 +122,9 @@ export function buildAuditEvent(params) {
 
   return event;
 }
+
+export const _internal = {
+  OUTCOME_DETAIL_CODES,
+  REDACTED_OUTCOME_DETAIL,
+  safeOutcomeDetail,
+};

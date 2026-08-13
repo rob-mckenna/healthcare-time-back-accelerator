@@ -64,6 +64,11 @@ test('production request flow refuses case and separator variants of sensitive k
   for (const requester of [
     { ...HUMAN, Email: 'n.testcase@hospital.example' },
     { ...HUMAN, access_token: 'PLACEHOLDER-NOT-A-REAL-TOKEN' },
+    { ...HUMAN, Authorization: 'Bearer PLACEHOLDER-NOT-A-REAL-TOKEN' },
+    { ...HUMAN, client_secret: 'PLACEHOLDER-NOT-A-REAL-SECRET' },
+    { ...HUMAN, 'API-Key': 'PLACEHOLDER-NOT-A-REAL-KEY' },
+    { ...HUMAN, nested: { CLIENT_SECRET: 'PLACEHOLDER-NOT-A-REAL-SECRET' } },
+    { ...HUMAN, claims: [{ api_key: 'PLACEHOLDER-NOT-A-REAL-KEY' }] },
   ]) {
     const result = await requestWith(requester, ORIGINAL_CONTEXT);
     assert.equal(result.ok, false);
