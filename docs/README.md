@@ -18,6 +18,7 @@ recorded in [`evidence/`](evidence/2026-08-12-integration-run.md).
 | [P0 execution plan](plan/p0-execution-plan.md) | Work packages, owners, dependencies, file ownership, acceptance criteria, validation commands, and milestone acceptance for the nurse journey |
 | [Requirements matrix](traceability/requirements-matrix.md) | Every `REQ-*` identifier, its charter source, owner, contract, and validation command |
 | [Architecture decisions](architecture/decisions/README.md) | Eleven accepted ADRs with the reasoning behind the baseline |
+| [Architecture diagrams](architecture/diagrams/README.md) | The shift-closeout diagram artifacts and the reproducible update/export process |
 | [Direct connected-agent architecture](architecture/copilot-studio-foundry-direct-connection.md) | Target Copilot Studio-to-Foundry path, control boundaries, and NOT RUN status |
 | [Risks](risks.md) | Blocker status, open validation risks, and the risk register |
 | [Assumptions](assumptions.md) | What the baseline depends on that has not been verified |
@@ -61,14 +62,14 @@ npm install
 npm run verify
 ```
 
-`npm run verify` runs contract validation, documentation validation, the secret
-scan, the fail-closed catalog, the governance checks, the instruction digest
-check, the local grounding evaluation, every test under `tests/`, and the local
-synthetic nurse journey. Individual commands are `npm run validate:contracts`,
-`npm run validate:docs`, `npm run scan:secrets`, `npm run test:fail-closed`,
-`npm run test:governance`, `npm run evaluate:digest`,
-`npm run evaluate:grounding`, `npm run test:unit`, and `npm run demo`. Each
-exits non-zero on failure.
+`npm run verify` runs contract validation, documentation validation, diagram
+validation, the secret scan, the fail-closed catalog, the governance checks, the
+instruction digest check, the local grounding evaluation, every test under
+`tests/`, and the local synthetic nurse journey. Individual commands are
+`npm run validate:contracts`, `npm run validate:docs`, `npm run validate:diagram`,
+`npm run scan:secrets`, `npm run test:fail-closed`, `npm run test:governance`,
+`npm run evaluate:digest`, `npm run evaluate:grounding`, `npm run test:unit`, and
+`npm run demo`. Each exits non-zero on failure.
 
 Live Microsoft Foundry evaluation is not part of these commands; issue #6
 records the separate 7/7 live result. Direct Copilot Studio connected-agent

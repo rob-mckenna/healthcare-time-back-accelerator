@@ -107,8 +107,15 @@ time without asking anyone to trust an unreviewed draft.
 
 The editable source for this diagram is
 [`docs/architecture/diagrams/shift-closeout-architecture.excalidraw`](docs/architecture/diagrams/shift-closeout-architecture.excalidraw).
-When updating it, edit the Excalidraw source first, export the SVG, and keep
-the SVG title/description and README alt text synchronized with the source.
+When updating it, edit the Excalidraw source first, bring the SVG into line,
+and keep the SVG title/description and README alt text synchronized with the
+source. The reproducible edit → sync → validate process, the invariants the
+diagram must always hold, and the narrow/mobile legibility approach are
+documented in
+[`docs/architecture/diagrams/README.md`](docs/architecture/diagrams/README.md).
+`npm run validate:diagram` enforces source-to-SVG parity, self-containment,
+accessibility, and the Option A scope invariants on every run of
+`npm run verify`.
 
 ---
 
@@ -158,8 +165,9 @@ failure.
 |---|---|
 | `npm run validate:contracts` | Compiles all JSON Schema 2020-12 contracts, validates every positive example against its schema, asserts that every negative fixture is refused for its recorded reason, and applies the cross-field rules. The gate for contract conformance. |
 | `npm run validate:docs` | Asserts required documents exist and are non-trivial, resolves all relative Markdown links, scans all Markdown prose for prohibited claim phrases, checks that documents presenting time-back figures carry the `ILLUSTRATIVE` label, verifies ADR field completeness, checks the ADR index, and validates requirement-ID hygiene. The gate for documentation conformance. |
+| `npm run validate:diagram` | Asserts the architecture diagram's Excalidraw source and committed SVG communicate the same architecture (label parity), the SVG is self-contained and accessible (role, `aria-labelledby`, non-trivial title and description, no external resources), the Option A scope invariants hold (exactly one Copilot Studio workflow and one Foundry Shift Closeout Agent), and the README embeds the SVG with non-trivial alt text. The gate for diagram conformance. |
 | `npm run scan:secrets` | Scans every file eligible for commit (via `git ls-files --cached --others --exclude-standard`, so it always follows the live `.gitignore` — including `.squad/`, `.github/`, and `.copilot/`) for credential, connection string, and direct-identifier patterns. The gate for secret hygiene. |
-| `npm run validate` | The three commands above in sequence. |
+| `npm run validate` | The four commands above in sequence. |
 | `npm run test:fail-closed` | Exercises every one of the twelve fail-closed codes through the orchestration layer, including the user-safe message mapping. |
 | `npm run test:governance` | Exercises validation order, the PHI scan, approval binding, audit minimality, and illustrative metric labelling. |
 | `npm run evaluate:digest` | Recomputes the agent instruction digest and asserts it matches the shipped manifest and the provenance examples. |
@@ -266,6 +274,7 @@ capabilities rule.
 | [`docs/demo/demonstration-script.md`](docs/demo/demonstration-script.md) | What appears on screen and what is said at each step |
 | [`docs/demo/talk-track.md`](docs/demo/talk-track.md) | Spoken words for live demonstration delivery |
 | [`docs/architecture/decisions/`](docs/architecture/decisions/README.md) | Eleven accepted ADRs |
+| [`docs/architecture/diagrams/`](docs/architecture/diagrams/README.md) | Architecture diagram artifacts and the reproducible update/export process |
 | [`docs/architecture/copilot-studio-foundry-direct-connection.md`](docs/architecture/copilot-studio-foundry-direct-connection.md) | Direct connected-agent architecture and validation boundary |
 | [`docs/risks.md`](docs/risks.md) | Blocker status, open validation risks, and the risk register |
 | [`docs/evidence/2026-08-12-integration-run.md`](docs/evidence/2026-08-12-integration-run.md) | Every validation command and its actual output from the integration run |

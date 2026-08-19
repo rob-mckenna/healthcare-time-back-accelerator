@@ -11,8 +11,9 @@
   "scripts": {
     "validate:contracts": "node scripts/validate-contracts.mjs",
     "validate:docs": "node scripts/validate-docs.mjs",
+    "validate:diagram": "node scripts/validate-diagram.mjs",
     "scan:secrets": "node scripts/scan-secrets.mjs",
-    "validate": "npm run validate:contracts && npm run validate:docs && npm run scan:secrets",
+    "validate": "npm run validate:contracts && npm run validate:docs && npm run validate:diagram && npm run scan:secrets",
     "test:unit": "node --test \"tests/**/*.test.mjs\"",
     "test:fail-closed": "node src/orchestration/test/run-fail-closed-catalog.mjs",
     "test:governance": "node src/governance/test/run-governance-checks.mjs",
