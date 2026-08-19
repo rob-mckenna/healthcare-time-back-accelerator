@@ -58,6 +58,7 @@ const REQUIRED_DOCS = [
   'docs/assumptions.md',
   'docs/plan/p0-execution-plan.md',
   'docs/architecture/decisions/README.md',
+  'docs/architecture/diagrams/README.md',
   'docs/conventions/correlation-id.md',
   'docs/conventions/draft-and-safety-status.md',
   'docs/conventions/prohibited-claims.json',
